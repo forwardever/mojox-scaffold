@@ -1,0 +1,5 @@
+WARNING: the ResourcefulRoutes plugin is experimental. The API might
+change in the future. Looking at the ResourcefulRoutes plugin source code
+can give you a deeper understanding of how plugins and helpers work in
+Mojolicious and it also provides you with a suggestion how to create a bunch
+of RESTful routes with a single command.
