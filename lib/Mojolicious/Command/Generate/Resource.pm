@@ -67,17 +67,24 @@ sub run {
 
 
     # Create empty template files
-    $self->render_to_rel_file('index',       $tmpl_path."/index.html.ep");
+    $self->renderer->line_start('%%');
+    $self->renderer->tag_start('<%%');
+    $self->renderer->tag_end('%%>');
+
+    $self->render_to_rel_file('index',       $tmpl_path."/index.html.ep", $res_name);
     $self->render_to_rel_file('show',        $tmpl_path."/show.html.ep");
-    $self->render_to_rel_file('create_form', $tmpl_path."/create_form.html.ep");
-    $self->render_to_rel_file('update_form', $tmpl_path."/update_form.html.ep");
+    $self->render_to_rel_file('create_form', $tmpl_path."/create_form.html.ep", $res_name);
+    $self->render_to_rel_file('update_form', $tmpl_path."/update_form.html.ep", $res_name);
 
 }
 
 1;
 __DATA__
 @@ index
-Template for displaying a list of resource items
+%% my $res_name = shift;
+Template for displaying a list of resource items<br />
+<%= link_to 'Index' => '<%%= $res_name %%>_index' %>
+<%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
 
 
 @@ show
@@ -85,11 +92,30 @@ Template for displaying a single resource item
 
 
 @@ create_form
+%% my $res_name = shift;
 Template for displaying a form that allows to create a new resource item
+<%= form_for '<%%= $res_name %%>_create', method => 'post' => begin %>
+    Text field 1 <%= text_field 'foo', value => '' %><br />
+    Text field 2 <%= text_field 'bar', value => '' %><br />
+    <%= submit_button 'Submit' %>
+<% end %>
+<br />
+<%= link_to 'Index' => '<%%= $res_name %%>_index' %>
+<%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
 
 
 @@ update_form
+%% my $res_name = shift;
 Template for displaying a form that allows to edit an existing resource item
+<%= form_for '<%%= $res_name %%>_update', method => 'post' => begin %>
+    Text field 1 <%= text_field 'foo', value => '' %><br />
+    Text field 2 <%= text_field 'bar', value => '' %><br />
+    <%= submit_button 'Submit' %>
+    <%= hidden_field '_method' => 'put' %><br /><!-- DO NOT REMOVE, NEEDED TO TRANSFORM POST TO PUT -->
+<% end %>
+<br />
+<%= link_to 'Index' => '<%%= $res_name %%>_index' %>
+<%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
 
 
 @@ controller
@@ -140,6 +166,7 @@ sub create {
     # $id = ...;
     # and redirect to "show" in order to display the created resource
     # $self->redirect_to('<%=$res_name%>_show', id => $id );
+    $self->render_text('create: save data and redirect');
 }
 
 
@@ -147,6 +174,7 @@ sub update {
     my $self = shift;
     # redirect to "show" in order to display the updated resource
     # $self->redirect_to('<%=$res_name%>_show', id => $self->stash('id') );
+    $self->render_text('update: save data and redirect');
 }
 
 
