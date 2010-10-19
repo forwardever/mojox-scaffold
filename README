@@ -3,3 +3,162 @@ change in the future. Looking at the ResourcefulRoutes plugin source code
 can give you a deeper understanding of how plugins and helpers work in
 Mojolicious and it also provides you with a suggestion how to create a bunch
 of RESTful routes with a single command.
+
+
+ResourcefulRoutes in action
+---------------------------
+
+1.) Install ResourcefulRoutes, using cpanminus, this is just
+
+    cpanm http://github.com/forwardever/mojolicious-plugin-resourceful_routes/tarball/master
+
+2.) Create a Mojolicious app:
+
+    mojolicious generate app Test
+
+3.) Switch to the newly created Test app:
+
+    cd Test
+
+4.) Create a resource
+
+    mojolicious generate resource Test users
+
+Note: enter the exact name of your application, so if the app name starts with
+a capital letter, also use a capital letter in the "generate resource" command!
+Resource names are lowercase!
+
+The following files have been created by ResourcefulRoutes:
+
+    /test/lib/Test/Users.pm  # Controller file
+    /test/templates/users
+    /test/templates/users/index.html.ep
+    /test/templates/users/show.html.ep
+    /test/templates/users/create_form.html.ep
+    /test/templates/users/update_form.html.ep
+
+The controller file located at "/test/lib/Test/Users.pm" looks like this:
+    
+    package Test::Users;
+    
+    use strict;
+    use warnings;
+    
+    use base 'Mojolicious::Controller';
+    
+    
+    sub index {
+        my $self = shift;
+        # Read all resource items from a database and save them in the stash
+        # to make them available in the template index.html.ep
+    }
+    
+    
+    sub show {
+        my $self = shift;
+        # Read existing data from a database using
+        # $self->stash('id')
+        # and save it to the stash to make it available in the template
+        # show.html.ep
+    }
+    
+    
+    sub create_form {
+        my $self = shift;
+    }
+    
+    
+    sub update_form {
+        my $self = shift;
+        # Read existing data for the resource item from a database using
+        # $self->stash('id')
+        # and save it to the stash to
+        # make it available in the template update_form.html.ep
+    }
+    
+    
+    sub create {
+        my $self = shift;
+        # you could fetch the newly created id
+        # and redirect to show in order to display the created resource
+        # $self->redirect_to('users_show', id => NEW_ID );
+    }
+    
+    
+    sub update {
+        my $self = shift;
+        # redirect to show in order to display the updated resource
+        # $self->redirect_to('users_show', id => $self->stash('id') );
+    }
+    
+    
+    sub delete {
+        my $self = shift;
+    }
+    
+    1;
+
+5.) Create a resource in the routes file located at "/test/lib/Test.pm"
+by adding to the startup method:
+
+    $self->plugin('resourceful_routes');
+    $self->resources('users');
+
+Also remove the existing routes!
+
+$self->resources('users') automatically generates the following routes
+on each start of your app:
+
+        # GET /users/new - form to create a user
+        $r->route('/users/new')->via('get')
+          ->to(controller => 'users', action => 'create_form')
+          ->name('users_create_form');
+
+        # GET /users/123 - show user with id 123
+        $r->route('/users/:id')->via('get')
+          ->to(controller => 'users', action => 'show')->name('users_show');
+
+        # GET /users/123/edit - form to update a user
+        $r->route('/users/:id/edit')->via('get')
+          ->to(controller => 'users', action => 'update_form')
+          ->name('users_update_form');
+
+        # GET /users - list of all users
+        $r->route('/users')->via('get')
+          ->to(controller => 'users', action => 'index')
+          ->name('users_index');
+
+        # POST /users - create new user
+        $r->route('/users')->via('post')
+          ->to(controller => 'users', action => 'create')
+          ->name('users_create');
+
+        # PUT /users/123 - update an existing user
+        $r->route('/users/:id')->via('put')
+          ->to(controller => 'users', action => 'update')
+          ->name('users_update');
+
+        # DELETE /users/123 - delete an existing user
+        $r->route('/users/:id')->via('delete')
+          ->to(controller => 'users', action => 'delete')
+          ->name('users_delete');
+
+
+6.) Start your app:
+
+    perl script/test daemon --reload
+
+7.) Enter one of the following URLs to see the result:
+
+    http://localhost:3000/users
+    http://localhost:3000/users/123
+    http://localhost:3000/users/123/edit
+    http://localhost:3000/users/new
+
+8.) Add real forms to the templates and database access to the controller to
+make create, update and delete work.
+
+9.) Note: as PUT and DELETE methods are not supported by old HTML standard, you
+have to add a hidden parameter in your update and delete forms:
+<input type="hidden" name="_method" value="put" />
+<input type="hidden" name="_method" value="delete" />

@@ -5,7 +5,10 @@ use warnings;
 
 use base 'Mojolicious::Plugin';
 
-our $VERSION = '0.01';
+use Mojo::ByteStream;
+use Mojo::Command;
+
+our $VERSION = '0.02';
 
 sub register {
     my ($self, $app) = @_;
@@ -60,17 +63,24 @@ sub generate_routes {
     my $self = shift;
     my ($c, $resource, $options) = @_;
 
-    my $ns         = $options->{namespace};
     my $singular   = $options->{singular};
-    my $controller = $options->{controller};
 
-    my $crtl_file = $controller ? $controller : $resource;
 
-    my $path = $ns ? $ns . '/' . $resource  : $resource;
-    my $ctrl = $ns ? $ns . '-' . $crtl_file : $crtl_file;
-    my $name = $ns ? $ns . '_' . $resource  : $resource;
+    # Create path for routes
+    my $path = join('/', split(/-/, $resource) );
 
+
+    # Resource name is part of the route name
+    my $name = $resource;
+
+
+    # Create controller path
+    my $ctrl = $resource;
+
+
+    # Get routes object
     my $r = $c->app->routes;
+
 
     # Singular resource, i.e. app knows id value (e.g. from login)
     if ($singular) {

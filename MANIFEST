@@ -3,4 +3,5 @@ Changes
 MANIFEST
 README
 lib/Mojolicious/Plugin/ResourcefulRoutes.pm
+lib/Mojolicious/Command/Generate/Resource.pm
 MYMETA.yml
