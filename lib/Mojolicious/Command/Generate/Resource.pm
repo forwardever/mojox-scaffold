@@ -56,7 +56,7 @@ sub run {
         die 'Template path '.$tmpl_path.' already exists. Resource could NOT be created!';
     }
 
-    # Make sure template path does not already exists
+    # Make sure controller file does not already exists
     if ( -e $ctrl_path ){
         die 'Controller file '.$ctrl_path.' already exists. Resource could NOT be created!';
     }
