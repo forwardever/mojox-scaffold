@@ -9,9 +9,6 @@ use base 'Mojolicious';
 sub startup {
     my $self = shift;
 
-    # Only log errors to STDERR
-    $self->log->level('fatal');
-
     $self->plugin('resourceful_routes');
     $self->resources('users','admin-users');
 

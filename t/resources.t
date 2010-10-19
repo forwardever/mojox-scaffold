@@ -72,6 +72,7 @@ $t->get_ok('/admin/users')
   ->header_is(Server => 'Mojolicious (Perl)')
   ->content_is("Template for displaying a list of resource items! Route name: admin-users_index");
 
+
 $t->get_ok('/admin/users/123')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
@@ -82,6 +83,7 @@ $t->get_ok('/admin/users/123/edit')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
   ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: admin-users_update_form");
+
 
 $t->get_ok('/admin/users/new')
   ->status_is(200)
