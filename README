@@ -5,6 +5,19 @@ Mojolicious and it also provides you with a suggestion how to create a bunch
 of RESTful routes with a single command.
 
 
+ResourcefulRoutes Summary
+---------------------------
+
+In many cases, you have to create the same template and route structures and controller methods again and again.
+
+For example, in order to manage a list of users, you need routes, controller methods and templates to
+    - to list all users,
+    - to display information on a single user and
+    - to create, update and delete users.
+
+ResourcefulRoutes helps you to set up a controller, template files and routes with a few commands.
+
+
 ResourcefulRoutes in action
 ---------------------------
 
