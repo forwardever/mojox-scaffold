@@ -1,1 +1,1 @@
-Template for displaying a list of resource items
+Template for displaying a list of resource items! Route name: <%= $route_name =>

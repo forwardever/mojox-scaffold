@@ -1,1 +1,1 @@
-Template for displaying a single resource item
+Template for displaying a single resource item! Route name: <%= $route_name =>

@@ -25,25 +25,25 @@ use_ok 'Test::Admin::Users';
 $t->get_ok('/users')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a list of resource items\n");
+  ->content_is("Template for displaying a list of resource items! Route name: users_index");
 
 
 $t->get_ok('/users/123')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a single resource item\n");
+  ->content_is("Template for displaying a single resource item! Route name: users_show");
 
 
 $t->get_ok('/users/123/edit')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a form that allows to edit an existing resource item\n");
+  ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: users_update_form");
 
 
 $t->get_ok('/users/new')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a form that allows to create a new resource item\n");
+  ->content_is("Template for displaying a form that allows to create a new resource item! Route name: users_create_form");
 
 
 $t->post_ok('/users')
@@ -70,23 +70,23 @@ $t->delete_ok('/users/123')
 $t->get_ok('/admin/users')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a list of resource items\n");
+  ->content_is("Template for displaying a list of resource items! Route name: admin-users_index");
 
 $t->get_ok('/admin/users/123')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a single resource item\n");
+  ->content_is("Template for displaying a single resource item! Route name: admin-users_show");
 
 
 $t->get_ok('/admin/users/123/edit')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a form that allows to edit an existing resource item\n");
+  ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: admin-users_update_form");
 
 $t->get_ok('/admin/users/new')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a form that allows to create a new resource item\n");
+  ->content_is("Template for displaying a form that allows to create a new resource item! Route name: admin-users_create_form");
 
 
 $t->post_ok('/admin/users')
