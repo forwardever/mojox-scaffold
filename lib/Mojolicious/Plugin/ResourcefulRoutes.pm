@@ -6,7 +6,6 @@ use warnings;
 use base 'Mojolicious::Plugin';
 
 use Mojo::ByteStream;
-use Mojo::Command;
 
 our $VERSION = '0.02';
 
