@@ -140,7 +140,6 @@ sub create {
     # $id = ...;
     # and redirect to "show" in order to display the created resource
     # $self->redirect_to('<%=$res_name%>_show', id => $id );
-    $self->render_text('POST request, create method executed!'); # can be deleted
 }
 
 
@@ -148,13 +147,11 @@ sub update {
     my $self = shift;
     # redirect to "show" in order to display the updated resource
     # $self->redirect_to('<%=$res_name%>_show', id => $self->stash('id') );
-    $self->render_text('PUT request, update method executed!'); # can be deleted
 }
 
 
 sub delete {
     my $self = shift;
-    $self->render_text('DELETE request, delete method executed!'); # can be deleted
 }
 
 1;
