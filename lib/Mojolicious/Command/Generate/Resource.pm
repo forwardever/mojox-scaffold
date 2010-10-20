@@ -65,16 +65,16 @@ sub run {
         die 'Controller file '.$ctrl_path.' already exists. Resource could NOT be created!';
     }
 
-
-    # Create a controller file
-    $self->render_to_rel_file('controller', $ctrl_path, $app_name, $res_class, $res_name);
-
-
-    # Create empty template files
+    # Change tags
     $self->renderer->line_start('%%');
     $self->renderer->tag_start('<%%');
     $self->renderer->tag_end('%%>');
 
+
+    # Create a controller file
+    $self->render_to_rel_file('controller', $ctrl_path, $app_name, $res_class, $res_name);
+
+    # Create template files
     $self->render_to_rel_file('resourceful_layout', $layout_path."/resourceful_layout.html.ep", $res_name);
     $self->render_to_rel_file('index',       $tmpl_path."/index.html.ep", $res_name);
     $self->render_to_rel_file('show',        $tmpl_path."/show.html.ep");
@@ -120,7 +120,7 @@ Template for displaying a form that allows to edit an existing resource item
 <%= form_for '<%%= $res_name %%>_update', method => 'post' => begin %>
     Text field 1 <%= text_field 'foo', value => '' %><br />
     Text field 2 <%= text_field 'bar', value => '' %><br />
-    <%= submit_button 'Submit' %>´
+    <%= submit_button 'Submit' %>
     <!-- DO NOT REMOVE HIDDEN FIELD, NEEDED TO TRANSFORM POST TO PUT -->
     <%= hidden_field '_method' => 'put' %><br />
 <% end %>
@@ -137,10 +137,10 @@ Template for displaying a form that allows to edit an existing resource item
 
 
 @@ controller
-% my $name = shift;
-% my $resource_camelized = shift;
-% my $res_name = shift;
-package <%= $name %>::<%= $resource_camelized %>;
+%% my $name = shift;
+%% my $resource_camelized = shift;
+%% my $res_name = shift;
+package <%%= $name %%>::<%%= $resource_camelized %%>;
 
 use strict;
 use warnings;
@@ -183,7 +183,7 @@ sub create {
     # fetch the newly created id
     # $id = ...;
     # and redirect to "show" in order to display the created resource
-    # $self->redirect_to('<%=$res_name%>_show', id => $id );
+    # $self->redirect_to('<%%=$res_name%%>_show', id => $id );
     $self->render_text('create: save data and redirect');
 }
 
@@ -191,7 +191,7 @@ sub create {
 sub update {
     my $self = shift;
     # redirect to "show" in order to display the updated resource
-    # $self->redirect_to('<%=$res_name%>_show', id => $self->stash('id') );
+    # $self->redirect_to('<%%=$res_name%%>_show', id => $self->stash('id') );
     $self->render_text('update: save data and redirect');
 }
 
