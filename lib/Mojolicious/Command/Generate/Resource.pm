@@ -51,6 +51,10 @@ sub run {
     my $tmpl_path = $tmpl_base.'/'.$tmpl_sub_path;
 
 
+    # Create layout path
+    my $layout_path = 'templates/layouts';
+
+
     # Make sure template path does not already exists
     if ( -e $tmpl_path ){
         die 'Template path '.$tmpl_path.' already exists. Resource could NOT be created!';
@@ -71,9 +75,11 @@ sub run {
     $self->renderer->tag_start('<%%');
     $self->renderer->tag_end('%%>');
 
+    $self->render_to_rel_file('resourceful_layout', $layout_path."/resourceful_layout.html.ep", $res_name);
     $self->render_to_rel_file('index',       $tmpl_path."/index.html.ep", $res_name);
     $self->render_to_rel_file('show',        $tmpl_path."/show.html.ep");
     $self->render_to_rel_file('create_form', $tmpl_path."/create_form.html.ep", $res_name);
+    $self->render_to_rel_file('update_form', $tmpl_path."/update_form.html.ep", $res_name);
     $self->render_to_rel_file('update_form', $tmpl_path."/update_form.html.ep", $res_name);
 
 }
@@ -82,17 +88,20 @@ sub run {
 __DATA__
 @@ index
 %% my $res_name = shift;
+% layout 'resourceful_layout', title => 'Index';
 Template for displaying a list of resource items<br />
 <%= link_to 'Index' => '<%%= $res_name %%>_index' %>
 <%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
 
 
 @@ show
+% layout 'resourceful_layout', title => 'Show';
 Template for displaying a single resource item
 
 
 @@ create_form
 %% my $res_name = shift;
+% layout 'resourceful_layout', title => 'Create Form';
 Template for displaying a form that allows to create a new resource item
 <%= form_for '<%%= $res_name %%>_create', method => 'post' => begin %>
     Text field 1 <%= text_field 'foo', value => '' %><br />
@@ -106,16 +115,25 @@ Template for displaying a form that allows to create a new resource item
 
 @@ update_form
 %% my $res_name = shift;
+% layout 'resourceful_layout', title => 'Update Form';
 Template for displaying a form that allows to edit an existing resource item
 <%= form_for '<%%= $res_name %%>_update', method => 'post' => begin %>
     Text field 1 <%= text_field 'foo', value => '' %><br />
     Text field 2 <%= text_field 'bar', value => '' %><br />
-    <%= submit_button 'Submit' %>
-    <%= hidden_field '_method' => 'put' %><br /><!-- DO NOT REMOVE, NEEDED TO TRANSFORM POST TO PUT -->
+    <%= submit_button 'Submit' %>´
+    <!-- DO NOT REMOVE HIDDEN FIELD, NEEDED TO TRANSFORM POST TO PUT -->
+    <%= hidden_field '_method' => 'put' %><br />
 <% end %>
 <br />
 <%= link_to 'Index' => '<%%= $res_name %%>_index' %>
 <%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
+
+
+@@ resourceful_layout
+<!doctype html><html>
+    <head><title><%= $title %></title></head>
+    <body><%= content %></body>
+</html>
 
 
 @@ controller
