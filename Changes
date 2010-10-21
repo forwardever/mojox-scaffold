@@ -1,3 +1,8 @@
+0.03    2010-10-22 00:00:00
+        - Improved template scaffolding (tag helpers)
+        - Improved controller scaffolding (working model using a perl class array)
+        
+
 0.02    2010-10-19 00:00:00
         - Added scaffolding (mojolicious generate resource appname resourcename)
         - Removed namespace option (now: admin-users generates

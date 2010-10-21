@@ -33,83 +33,23 @@ ResourcefulRoutes in action
 
     cd Test
 
-4.) Create a resource
+4.) Now create a resource
 
-    mojolicious generate resource Test users
+    perl script/Test generate resource users first_name:string last_name:string description:text
 
 Note: enter the exact name of your application, so if the app name starts with
 a capital letter, also use a capital letter in the "generate resource" command!
 Resource names are lowercase!
 
-The following files have been created by ResourcefulRoutes:
+The following files have been created by ResourcefulRoutes (using standard mojolicious config):
 
     /test/lib/Test/Users.pm  # Controller file
+    /test/templates/layouts/resourceful_layout.html.ep
     /test/templates/users
     /test/templates/users/index.html.ep
     /test/templates/users/show.html.ep
     /test/templates/users/create_form.html.ep
     /test/templates/users/update_form.html.ep
-
-The controller file located at "/test/lib/Test/Users.pm" looks like this:
-    
-    package Test::Users;
-    
-    use strict;
-    use warnings;
-    
-    use base 'Mojolicious::Controller';
-    
-    
-    sub index {
-        my $self = shift;
-        # Read all resource items from a database and save them in the stash
-        # to make them available in the template index.html.ep
-    }
-    
-    
-    sub show {
-        my $self = shift;
-        # Read existing data from a database using
-        # $self->stash('id')
-        # and save it to the stash to make it available in the template
-        # show.html.ep
-    }
-    
-    
-    sub create_form {
-        my $self = shift;
-    }
-    
-    
-    sub update_form {
-        my $self = shift;
-        # Read existing data for the resource item from a database using
-        # $self->stash('id')
-        # and save it to the stash to
-        # make it available in the template update_form.html.ep
-    }
-    
-    
-    sub create {
-        my $self = shift;
-        # you could fetch the newly created id
-        # and redirect to show in order to display the created resource
-        # $self->redirect_to('users_show', id => NEW_ID );
-    }
-    
-    
-    sub update {
-        my $self = shift;
-        # redirect to show in order to display the updated resource
-        # $self->redirect_to('users_show', id => $self->stash('id') );
-    }
-    
-    
-    sub delete {
-        my $self = shift;
-    }
-    
-    1;
 
 5.) Create a resource in the routes file located at "/test/lib/Test.pm"
 by adding to the startup method:
@@ -168,8 +108,7 @@ on each start of your app:
     http://localhost:3000/users/123/edit
     http://localhost:3000/users/new
 
-8.) Add real forms to the templates and database access to the controller to
-make create, update and delete work.
+8.) Add database access, change template, configure everything as you need it
 
 9.) Note: as PUT and DELETE methods are not supported by old HTML standard, you
 have to add a hidden parameter in your update and delete forms:
