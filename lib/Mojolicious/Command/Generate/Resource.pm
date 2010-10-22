@@ -26,6 +26,7 @@ sub run {
     # Get app instance
     my $app = Mojo::Server->new->app || die 'app not found';
 
+
     # Get app name
     my $app_name = $app->routes->namespace;
 
@@ -55,34 +56,25 @@ sub run {
     my $unique_key;
     my $unique_key_type;
 
-    foreach my $param (@params){
-        chomp $param;
 
-        die 'format of parameters has to be: "name:type" or "-option_name:value", no spaces, just alphanumeric plus _ (underscore) plus - when passing options, malformed parameter >> "'.$param.'"'
-          unless $param =~m/^-{0,1}[\w]+:[\w]+$/;
+    # Validate parameters
+    $self->validate_params([@params]);
+
+
+    foreach my $param (@params){
 
         my ($name, $type) = split(/:/, $param );
 
         # Options
-        if ($param =~m/^-[\w]+:[\w]+$/){
-
+        if ($param =~m/^-/){
             if ( $name eq '-unique_key' ){
                 $unique_key = $type;
             }
-            else {
-                die 'unknown option ("'.$name.'"), available options: "-unique_key", malformed parameter >> "'.$param.'"'
-                    unless $name eq '-unique_key';
-            }
-
         }
         # Data fields
         else {
-            die 'wrong format ("'.$type.'"), format can be "int", "string" or "text", malformed parameter >> "'.$param.'"'
-              unless $type eq 'int' || $type eq 'string' || $type eq 'text';
-    
             push @form_fields, $name;
             $form_fields_type{$name} = $type;
-    
             #$config .= $param."\n";
         }
     }
@@ -152,6 +144,51 @@ sub run {
 
 }
 
+
+sub validate_params {
+    my $self   = shift;
+    my $params = shift;
+
+    my $valid_options = {
+        'unique_key' => 1,
+    };
+
+    my $valid_data_types = {
+        'int'    => 1,
+        'string' => 1,
+        'text'   => 1,
+    };
+
+    foreach my $param (@$params){
+        # Cleanup
+        chomp $param;
+
+        # Validate general format
+        if ($param !~m/^-{0,1}[\w]+:[\w]+$/){
+            die qq|format of parameters has to be: "name:type" or| .
+                qq|"-option_name:value", no spaces, just alphanumeric plus _| .
+                qq| (underscore) plus - (hyphen, ahead of options), malformed| .
+                qq| parameter >> "$param"|;
+        }
+
+        # Split data
+        my ($name, $type) = split(/:/, $param );
+
+        # Validate options
+        if ($name =~s/^-// && !$valid_options->{$name}){
+            die qq|unknown option "$name", available options: |.
+                join(', ', map {'"'.$_.'"'} keys %$valid_options).
+                qq|, malformed parameter >> "$param"|;
+        }
+
+        # Validate form field
+        elsif (!$valid_data_types->{$type}){
+            die qq|wrong format "$type", format can be: |.
+                join(', ', map {'"'.$_.'"'} keys %$valid_data_types).
+                qq|, malformed parameter >> "$param"|;
+        }
+    }
+}
 
 1;
 
