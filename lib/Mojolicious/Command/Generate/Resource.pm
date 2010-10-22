@@ -23,31 +23,21 @@ sub run {
     my $res_name = shift || die 'no resource name passed';
     my @params = @_;
 
-    # Get app instance
-    my $app = Mojo::Server->new->app || die 'app not found';
+    # Create resource hash ref
+    my $resource = {};
 
+    # Save resource name
+    $resource->{name} = $res_name;
 
-    # Get app name
-    my $app_name = $app->routes->namespace;
+    # Get paths
+    $self->get_paths($resource);
 
-    # Template base path
-    my $tmpl_base = $app->renderer->root;
+    # Validate paths
+    $self->validate_paths($resource);
 
-    # Make sure template path exists
-    unless ( -e $tmpl_base ){
-        die 'Template path '.$tmpl_base.' not found! Make sure that you switch to the directory where your application is located before running "mojolicious generate resource"!';
-    }
-
-    # Controller base path
-    my $ctrl_base = 'lib/'.$app_name;
-
-    # Make sure controller path exists
-    unless ( -e $ctrl_base ){
-        die 'Controller path '.$ctrl_base.' not found! Make sure that you switch to the directory where your application is located before running "mojolicious generate resource"!';
-    }
 
     # Config path
-    my $conf_path = 'config/resources/'.$res_name.'.conf';
+    #my $conf_path = 'config/resources/'.$res_name.'.conf';
 
     # Read data fields
     my $config;
@@ -100,32 +90,6 @@ sub run {
     # $self->render_to_rel_file('config', $conf_path, $config);
 
 
-    # Create controller path
-    my $res_class = Mojo::ByteStream->new($res_name)->camelize->to_string;
-    my $ctrl_sub_path = $self->class_to_path($res_class);
-    my $ctrl_path = $ctrl_base.'/'.$ctrl_sub_path;
-
-
-    # Create template path
-    my $tmpl_sub_path = join('/', split(/-/, $res_name) );
-    my $tmpl_path = $tmpl_base.'/'.$tmpl_sub_path;
-
-
-    # Create layout path
-    my $layout_path = $tmpl_base.'/layouts';
-
-
-    # Make sure template path does not already exists
-    if ( -e $tmpl_path ){
-        die 'Template path '.$tmpl_path.' already exists. Resource could NOT be created!';
-    }
-
-    # Make sure controller file does not already exists
-    if ( -e $ctrl_path ){
-        die 'Controller file '.$ctrl_path.' already exists. Resource could NOT be created!';
-    }
-
-
     # Change tags
     $self->renderer->line_start('%%');
     $self->renderer->tag_start('<%%');
@@ -133,14 +97,14 @@ sub run {
 
 
     # Create a controller file
-    $self->render_to_rel_file('controller', $ctrl_path, $app_name, $res_class, $res_name,\@form_fields);
+    $self->render_to_rel_file('controller', $resource->{paths}->{ctrl}, $resource, \@form_fields);
 
     # Create template files
-    $self->render_to_rel_file('resourceful_layout', $layout_path."/resourceful_layout.html.ep", $res_name);
-    $self->render_to_rel_file('index',       $tmpl_path."/index.html.ep", $res_name, \@form_fields);
-    $self->render_to_rel_file('show',        $tmpl_path."/show.html.ep", $res_name, \@form_fields);
-    $self->render_to_rel_file('create_form', $tmpl_path."/create_form.html.ep", $res_name, \@form_fields, \%form_fields_type);
-    $self->render_to_rel_file('update_form', $tmpl_path."/update_form.html.ep", $res_name, \@form_fields, \%form_fields_type);
+    $self->render_to_rel_file('resourceful_layout', $resource->{paths}->{layout}."/resourceful_layout.html.ep", $res_name);
+    $self->render_to_rel_file('index',       $resource->{paths}->{tmpl}."/index.html.ep", $res_name, \@form_fields);
+    $self->render_to_rel_file('show',        $resource->{paths}->{tmpl}."/show.html.ep", $res_name, \@form_fields);
+    $self->render_to_rel_file('create_form', $resource->{paths}->{tmpl}."/create_form.html.ep", $res_name, \@form_fields, \%form_fields_type);
+    $self->render_to_rel_file('update_form', $resource->{paths}->{tmpl}."/update_form.html.ep", $res_name, \@form_fields, \%form_fields_type);
 
 }
 
@@ -165,10 +129,10 @@ sub validate_params {
 
         # Validate general format
         if ($param !~m/^-{0,1}[\w]+:[\w]+$/){
-            die qq|format of parameters has to be: "name:type" or| .
-                qq|"-option_name:value", no spaces, just alphanumeric plus _| .
-                qq| (underscore) plus - (hyphen, ahead of options), malformed| .
-                qq| parameter >> "$param"|;
+            die qq|format of parameters has to be: "name:type" or | .
+                qq|"-option_name:value", no spaces, just alphanumeric, | .
+                qq|"_" (underscore) and "-" (hyphen, ahead of options), | .
+                qq|malformed parameter >> "$param"|;
         }
 
         # Split data
@@ -187,6 +151,94 @@ sub validate_params {
                 join(', ', map {'"'.$_.'"'} keys %$valid_data_types).
                 qq|, malformed parameter >> "$param"|;
         }
+    }
+}
+
+
+sub get_paths {
+    my $self     = shift;
+    my $resource = shift;
+
+    # Resource name
+    my $resource_name = $resource->{name};
+
+    # Get app instance and name
+    my $app      = Mojo::Server->new->app || die 'app not found';
+    my $app_name = $app->routes->namespace;
+
+    # Controller base path
+    my $ctrl_base = 'lib/'.$app_name;
+
+    # Controller/Ressource class
+    my $resource_class = $app_name.'::'.Mojo::ByteStream->new($resource_name)
+      ->camelize->to_string;
+
+    # Controller path
+    my $ctrl_path = 'lib/'.$self->class_to_path($resource_class);
+
+    # Template base path
+    my $tmpl_base = $app->renderer->root;
+
+    # Template path
+    my $tmpl_sub_path = join('/', split(/-/, $resource_name) );
+    my $tmpl_path = $tmpl_base.'/'.$tmpl_sub_path;
+
+    # Layout path
+    my $layout_path = $tmpl_base.'/layouts';
+
+    # Save paths to resource hash ref
+    $resource->{paths} = {
+        ctrl      => $ctrl_path,
+        tmpl      => $tmpl_path,
+        layout    => $layout_path,
+        ctrl_base => $ctrl_base,
+        tmpl_base => $tmpl_base
+    };
+
+    # Save app name to resource hash ref
+    $resource->{app} = {
+        name => $app_name,
+    };
+
+    # Save resource class
+    $resource->{class} = $resource_class;
+
+}
+
+
+sub validate_paths {
+    my $self     = shift;
+    my $resource = shift;
+
+    my $tmpl_base = $resource->{paths}->{tmpl_base};
+    my $ctrl_base = $resource->{paths}->{ctrl_base};
+    my $tmpl_path = $resource->{paths}->{tmpl};
+    my $ctrl_path = $resource->{paths}->{ctrl};
+
+    # Make sure template path exists
+    unless ( -e $tmpl_base ){
+        die qq|Template path "$tmpl_base" not found! Make sure that you |.
+            qq|switch to the directory where your application is located |.
+            qq|before running "script/myapp generate resource"!|;
+    }
+
+    # Make sure controller path exists
+    unless ( -e $ctrl_base ){
+        die qq|Controller path "$ctrl_base" not found! Make sure that |.
+            qq|you switch to the directory where your application is |.
+            qq|located before running "script/myapp generate resource"!|;
+    }
+
+    # Make sure template path does not already exists
+    if ( -e $tmpl_path ){
+        die qq|Template path "$tmpl_path" already exists. Resource could |.
+            qq|NOT be created!|;
+    }
+
+    # Make sure controller file does not already exists
+    if ( -e $ctrl_path ){
+        die qq|Controller file $ctrl_path already exists. Resource could |.
+            qq|NOT be created!|;
     }
 }
 
@@ -363,14 +415,12 @@ __DATA__
 
 %%############################################################################
 @@ controller
-%% my $name = shift;
-%% my $resource_camelized = shift;
-%% my $res_name = shift;
+%% my $resource = shift;
 %% my $form_fields = shift;
 %% my $form_fields_list = join (',', map { '"'.$_.'"' } @$form_fields);
-%% my @res_name_parts = split(/-/,$res_name);
+%% my @res_name_parts = split(/-/,$resource->{name});
 %% my $res_name_last = $res_name_parts[-1];
-package <%%= $name %%>::<%%= $resource_camelized %%>;
+package <%%= $resource->{class} %%>;
 
 use strict;
 use warnings;
@@ -452,7 +502,7 @@ sub create {
 
 
     # and redirect to "show" in order to display the created resource
-    $self->redirect_to('<%%= $res_name %%>_show', id => $counter );
+    $self->redirect_to('<%%= $resource->{name} %%>_show', id => $counter );
 
 }
 
@@ -475,7 +525,7 @@ sub update {
     }
 
     # redirect to "show" in order to display the updated resource
-    $self->redirect_to('<%%= $res_name %%>_show', id => $id );
+    $self->redirect_to('<%%= $resource->{name} %%>_show', id => $id );
 
 }
 
