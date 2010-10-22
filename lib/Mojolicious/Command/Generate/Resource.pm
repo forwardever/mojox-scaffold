@@ -35,57 +35,15 @@ sub run {
     # Validate paths
     $self->validate_paths($resource);
 
+    # Validate parameters
+    $self->validate_params([@params], $resource);
+
+    # Unique id and form fields
+    $self->process_fields($resource);
+
 
     # Config path
-    #my $conf_path = 'config/resources/'.$res_name.'.conf';
-
-    # Read data fields
-    my $config;
-    my @form_fields;
-    my %form_fields_type;
-    my $unique_key;
-    my $unique_key_type;
-
-
-    # Validate parameters
-    $self->validate_params([@params]);
-
-
-    foreach my $param (@params){
-
-        my ($name, $type) = split(/:/, $param );
-
-        # Options
-        if ($param =~m/^-/){
-            if ( $name eq '-unique_key' ){
-                $unique_key = $type;
-            }
-        }
-        # Data fields
-        else {
-            push @form_fields, $name;
-            $form_fields_type{$name} = $type;
-            #$config .= $param."\n";
-        }
-    }
-
-
-    # no unique key passed
-    if (!$unique_key){
-        # id form field
-        if ($form_fields_type{id}){
-            my @new_form_fields = grep { $_ ne 'id' } @form_fields;
-            @form_fields = @new_form_fields;
-            $unique_key = 'id';
-            $unique_key_type = $form_fields_type{id};
-            $form_fields_type{id} = undef;
-        }
-        else {
-            $unique_key = 'id';
-            $unique_key_type = 'int';
-        }
-    }
-
+    # my $conf_path = 'config/resources/'.$res_name.'.conf';
     # Save config file for further use by ORMs
     # $self->render_to_rel_file('config', $conf_path, $config);
 
@@ -97,21 +55,63 @@ sub run {
 
 
     # Create a controller file
-    $self->render_to_rel_file('controller', $resource->{paths}->{ctrl}, $resource, \@form_fields);
+    $self->render_to_rel_file('controller', $resource->{paths}->{ctrl}, $resource);
+
 
     # Create template files
-    $self->render_to_rel_file('resourceful_layout', $resource->{paths}->{layout}."/resourceful_layout.html.ep", $res_name);
-    $self->render_to_rel_file('index',       $resource->{paths}->{tmpl}."/index.html.ep", $res_name, \@form_fields);
-    $self->render_to_rel_file('show',        $resource->{paths}->{tmpl}."/show.html.ep", $res_name, \@form_fields);
-    $self->render_to_rel_file('create_form', $resource->{paths}->{tmpl}."/create_form.html.ep", $res_name, \@form_fields, \%form_fields_type);
-    $self->render_to_rel_file('update_form', $resource->{paths}->{tmpl}."/update_form.html.ep", $res_name, \@form_fields, \%form_fields_type);
+    my $tmpl_path = $resource->{paths}->{tmpl};
+    my $layout_path = $resource->{paths}->{layout};
+
+    $self->render_to_rel_file('layout',      $layout_path.'/resources.html.ep');
+    $self->render_to_rel_file('index',       $tmpl_path.'/index.html.ep', $resource);
+    $self->render_to_rel_file('show',        $tmpl_path.'/show.html.ep', $resource);
+    $self->render_to_rel_file('create_form', $tmpl_path.'/create_form.html.ep', $resource);
+    $self->render_to_rel_file('update_form', $tmpl_path.'/update_form.html.ep', $resource);
 
 }
 
 
+sub process_fields {
+    my $self     = shift;
+    my $resource = shift;
+
+    my $options     = $resource->{options};
+    my $data_fields = $resource->{data_fields};
+
+    # Look for unique key
+    my $unique_key = $options->{unique_key};
+
+    # No unique key passed
+    $unique_key = 'id' unless defined $unique_key;
+
+    # Form fields
+    my @form_fields;
+    my @form_field_names;
+    my $unique_key_type;
+    foreach my $field (@$data_fields){
+        if ($field->{name} eq $unique_key) {
+            $unique_key_type = $field->{type};
+        }
+        else {
+            push @form_fields, $field;
+            push @form_field_names, $field->{name};
+        }
+    }
+
+    # No unique key type passed
+    $unique_key_type = 'int' unless defined $unique_key_type;
+
+    $resource->{unique_key}       = $unique_key;
+    $resource->{unique_key_type}  = $unique_key_type;
+    $resource->{form_fields}      = [@form_fields];
+    $resource->{form_field_names} = [@form_field_names];
+}
+
+
 sub validate_params {
-    my $self   = shift;
-    my $params = shift;
+    my $self     = shift;
+    my $params   = shift;
+    my $resource = shift;
 
     my $valid_options = {
         'unique_key' => 1,
@@ -122,6 +122,9 @@ sub validate_params {
         'string' => 1,
         'text'   => 1,
     };
+
+    my %options;
+    my @data_fields;
 
     foreach my $param (@$params){
         # Cleanup
@@ -138,8 +141,14 @@ sub validate_params {
         # Split data
         my ($name, $type) = split(/:/, $param );
 
+        # Is option
+        my $option = 0;
+        if ($name =~s/^-//){
+            $option = 1;
+        }
+
         # Validate options
-        if ($name =~s/^-// && !$valid_options->{$name}){
+        if ($option && !$valid_options->{$name}){
             die qq|unknown option "$name", available options: |.
                 join(', ', map {'"'.$_.'"'} keys %$valid_options).
                 qq|, malformed parameter >> "$param"|;
@@ -151,7 +160,21 @@ sub validate_params {
                 join(', ', map {'"'.$_.'"'} keys %$valid_data_types).
                 qq|, malformed parameter >> "$param"|;
         }
+
+        # Save options
+        if ($option) {
+            $options{$name} = $type;
+        }
+        # Save data fields
+        else {
+            push @data_fields, {name => $name, type => $type};
+        }
     }
+
+    # Save to resource
+    $resource->{options}       = {%options};
+    $resource->{data_fields}   = [@data_fields];
+
 }
 
 
@@ -249,19 +272,20 @@ __DATA__
 
 %%############################################################################
 @@ index
-%% my $res_name       = shift;
-%% my $form_fields    = shift;
+%% my $resource       = shift;
+%% my $res_name       = $resource->{name};
+%% my $form_fields    = $resource->{form_fields};
 %% my @res_name_parts = split(/-/,$res_name);
 %% my $res_name_last  = $res_name_parts[-1];
 
-% layout 'resourceful_layout', title => 'Index';
-<h1>List <%%= $res_name %%></h2><br />
+% layout 'resources', title => 'Index';
+<h1>List <%%= $res_name %%></h1><br />
 
 <table>
     <tr>
         %% foreach my $form_field (@$form_fields) {
         <th>
-          <%%= $form_field %%>
+          <%%= $form_field->{name} %%>
         </th>
         %% }
         <th>
@@ -275,7 +299,7 @@ __DATA__
     <tr>
         %% foreach my $form_field (@$form_fields) {
         <td>
-          <%= $item->{<%%= $form_field %%>} %>
+          <%= $item->{<%%= $form_field->{name} %%>} %>
         </td>
         %% }
         <td>
@@ -300,19 +324,20 @@ __DATA__
 
 %%############################################################################
 @@ show
-%% my $res_name    = shift;
-%% my $form_fields = shift;
-% layout 'resourceful_layout', title => 'Show';
-<h1>Show one item of <%%= $res_name %%></h2><br />
+%% my $resource    = shift;
+%% my $res_name    = $resource->{name};
+%% my $form_fields = $resource->{form_fields};
+% layout 'resources', title => 'Show';
+<h1>Show one item of <%%= $res_name %%></h1><br />
 
 <table>
     %% foreach my $form_field (@$form_fields) {
     <tr>
         <td>
-            <%%=$form_field%%>
+            <%%=$form_field->{name}%%>
         </td>
         <td>
-            <%= $item->{<%%=$form_field%%>} %>
+            <%= $item->{<%%=$form_field->{name}%%>} %>
         </td>
     </tr>
 
@@ -327,21 +352,21 @@ __DATA__
 
 %%############################################################################
 @@ create_form
-%% my $res_name = shift;
-%% my $form_fields = shift;
-%% my $form_fields_type = shift;
-% layout 'resourceful_layout', title => 'Create Form';
+%% my $resource    = shift;
+%% my $res_name    = $resource->{name};
+%% my $form_fields = $resource->{form_fields};
+% layout 'resources', title => 'Create Form';
 
-<h1>Create a new item of <%%= $res_name %%></h2><br />
+<h1>Create a new item of <%%= $res_name %%></h1><br />
 <%= form_for '<%%= $res_name %%>_create', method => 'post' => begin %>
   %% foreach my $field (@$form_fields) {
-  %% if ($form_fields_type->{$field} eq 'string' || $form_fields_type->{$field} eq 'int') {
-    <%%= $field %%>:<br />
-    <%= text_field '<%%= $field %%>', value => '' %><br /><br />
+  %% if ($field->{type} eq 'string' || $field->{type} eq 'int') {
+    <%%= $field->{name} %%>:<br />
+    <%= text_field '<%%= $field->{name} %%>', value => '' %><br /><br />
   %% }
-  %% elsif ($form_fields_type->{$field} eq 'text') {
-    <%%= $field %%>:<br />
-    <%= text_area <%%= $field %%> => begin %><% end %><br /><br />
+  %% elsif ($field->{type} eq 'text') {
+    <%%= $field->{name} %%>:<br />
+    <%= text_area <%%= $field->{name} %%> => begin %><% end %><br /><br />
   %% }
   %% }
     <%= submit_button 'Create' %>
@@ -354,22 +379,22 @@ __DATA__
 
 %%############################################################################
 @@ update_form
-%% my $res_name = shift;
-%% my $form_fields = shift;
-%% my $form_fields_type = shift;
-% layout 'resourceful_layout', title => 'Update Form';
+%% my $resource    = shift;
+%% my $res_name    = $resource->{name};
+%% my $form_fields = $resource->{form_fields};
+% layout 'resources', title => 'Update Form';
 
-<h1>Edit one item of <%%= $res_name %%></h2><br />
+<h1>Edit one item of <%%= $res_name %%></h1><br />
 
 <%= form_for '<%%= $res_name %%>_update', method => 'post' => begin %>
   %% foreach my $field (@$form_fields) {
-  %% if ($form_fields_type->{$field} eq 'string' || $form_fields_type->{$field} eq 'int') {
-    <%%= $field %%>:<br />
-    <%= text_field '<%%= $field %%>', value => $item->{<%%= $field %%>} %><br /><br />
+  %% if ($field->{type} eq 'string' || $field->{type} eq 'int') {
+    <%%= $field->{name} %%>:<br />
+    <%= text_field '<%%= $field->{name} %%>', value => $item->{<%%= $field->{name} %%>} %><br /><br />
   %% }
-  %% elsif ($form_fields_type->{$field} eq 'text') {
-    <%%= $field %%>:<br />
-    <%= text_area <%%= $field %%> => begin %><%=$item->{<%%= $field %%>}%><% end %><br /><br />
+  %% elsif ($field->{type} eq 'text') {
+    <%%= $field->{name} %%>:<br />
+    <%= text_area <%%= $field->{name} %%> => begin %><%=$item->{<%%= $field->{name} %%>}%><% end %><br /><br />
   %% }
   %% }
     <%= hidden_field '_method' => 'put' %><br />
@@ -382,7 +407,7 @@ __DATA__
 
 
 %%############################################################################
-@@ resourceful_layout
+@@ layout
 <!doctype html>
   <html>
     <head>
@@ -416,8 +441,7 @@ __DATA__
 %%############################################################################
 @@ controller
 %% my $resource = shift;
-%% my $form_fields = shift;
-%% my $form_fields_list = join (',', map { '"'.$_.'"' } @$form_fields);
+%% my $form_fields_list = join (',', map { '"'.$_.'"' } @{$resource->{form_field_names}});
 %% my @res_name_parts = split(/-/,$resource->{name});
 %% my $res_name_last = $res_name_parts[-1];
 package <%%= $resource->{class} %%>;
