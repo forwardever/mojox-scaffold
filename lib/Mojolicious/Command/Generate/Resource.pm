@@ -245,13 +245,6 @@ sub validate_paths {
             qq|before running "script/myapp generate resource"!|;
     }
 
-    # Make sure controller path exists
-    unless ( -e $ctrl_base ){
-        die qq|Controller path "$ctrl_base" not found! Make sure that |.
-            qq|you switch to the directory where your application is |.
-            qq|located before running "script/myapp generate resource"!|;
-    }
-
     # Make sure template path does not already exists
     if ( -e $tmpl_path ){
         die qq|Template path "$tmpl_path" already exists. Resource could |.
@@ -279,28 +272,20 @@ __DATA__
 %% my $res_name_last  = $res_name_parts[-1];
 
 % layout 'resources', title => 'Index';
-<h1>List <%%= $res_name %%></h1><br />
+    <h1>List <%%= $res_name %%></h1><br />
 
-<table>
-    <tr>
+    <table>
+      <tr>
         %% foreach my $form_field (@$form_fields) {
-        <th>
-          <%%= $form_field->{name} %%>
-        </th>
+        <th><%%= $form_field->{name} %%></th>
         %% }
-        <th>
-          Edit
-        </th>
-        <th>
-          View
-        </th>
-    </tr>
-    % foreach my $item (@$<%%= $res_name_last %%>){
-    <tr>
+        <th>Edit</th>
+        <th>View</th>
+      </tr>
+      % foreach my $item (@$<%%= $res_name_last %%>){
+      <tr>
         %% foreach my $form_field (@$form_fields) {
-        <td>
-          <%= $item->{<%%= $form_field->{name} %%>} %>
-        </td>
+        <td><%= $item->{<%%= $form_field->{name} %%>} %></td>
         %% }
         <td>
           <%= link_to 'Edit' => '<%%= $res_name %%>_update_form', { id => $item->{id} } %>
@@ -308,18 +293,18 @@ __DATA__
         <td>
           <%= link_to 'View' => '<%%= $res_name %%>_show', { id => $item->{id} } %>
         </td>
-    </tr>
-    % }
-    % if (!$<%%= $res_name_last %%> || !@$<%%= $res_name_last %%>) {
-    <tr>
-      <td colspan="<%%= @$form_fields+2 %%>">No Results</td>
-    </tr>
-    % }
-</table>
+      </tr>
+      % }
+      % if (!$<%%= $res_name_last %%> || !@$<%%= $res_name_last %%>) {
+      <tr>
+        <td colspan="<%%= @$form_fields+2 %%>">No Results</td>
+      </tr>
+      % }
+    </table>
 
-<br />
-<%= link_to 'Index' => '<%%= $res_name %%>_index' %>
-<%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
+    <br />
+    <%= link_to 'Index' => '<%%= $res_name %%>_index' %>
+    <%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
 
 
 %%############################################################################
@@ -386,7 +371,7 @@ __DATA__
 
 <h1>Edit one item of <%%= $res_name %%></h1><br />
 
-<%= form_for '<%%= $res_name %%>_update', method => 'post' => begin %>
+<%= form_for '<%%= $res_name %%>_update', {id => $id}, method => 'post' => begin %>
   %% foreach my $field (@$form_fields) {
   %% if ($field->{type} eq 'string' || $field->{type} eq 'int') {
     <%%= $field->{name} %%>:<br />
