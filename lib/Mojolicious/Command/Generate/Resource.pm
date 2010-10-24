@@ -185,15 +185,16 @@ sub get_paths {
     # Resource name
     my $resource_name = $resource->{name};
 
-    # Get app instance and name
-    my $app      = Mojo::Server->new->app || die 'app not found';
-    my $app_name = $app->routes->namespace;
+    # Get app instance
+    my $app       = Mojo::Server->new->app || die 'app not found';
+    my $namespace = $app->routes->namespace;
 
-    # Controller base path
-    my $ctrl_base = 'lib/'.$app_name;
+    # app name
+    my @namespace = split(/::/, $namespace);
+    my $app_name = $namespace[0];
 
     # Controller/Ressource class
-    my $resource_class = $app_name.'::'.Mojo::ByteStream->new($resource_name)
+    my $resource_class = $namespace.'::'.Mojo::ByteStream->new($resource_name)
       ->camelize->to_string;
 
     # Controller path
@@ -214,7 +215,6 @@ sub get_paths {
         ctrl      => $ctrl_path,
         tmpl      => $tmpl_path,
         layout    => $layout_path,
-        ctrl_base => $ctrl_base,
         tmpl_base => $tmpl_base
     };
 
@@ -234,7 +234,6 @@ sub validate_paths {
     my $resource = shift;
 
     my $tmpl_base = $resource->{paths}->{tmpl_base};
-    my $ctrl_base = $resource->{paths}->{ctrl_base};
     my $tmpl_path = $resource->{paths}->{tmpl};
     my $ctrl_path = $resource->{paths}->{ctrl};
 
