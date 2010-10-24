@@ -33,13 +33,25 @@ ResourcefulRoutes in action
 
     cd Test
 
-4.) Now create a resource
+4.) Set the correct namespace
 
-    perl script/Test generate resource users first_name:string last_name:string description:text
+Information on routes can now be found in the Test.pm file in the /lib folder.
+Now set the desired namespace for the controller files. As we want all of our
+controllers to be located under
 
-Note: enter the exact name of your application, so if the app name starts with
-a capital letter, also use a capital letter in the "generate resource" command!
-Resource names are lowercase!
+    /lib/Test/Controllers (namespace Test::Controllers)
+
+we add
+
+    $self->routes->namespace("Test::Controllers");
+
+to the beginning of the startup method in the routes file.
+
+
+5.) Create a resource
+
+    perl script/test generate resource users first_name:string last_name:string description:text
+
 
 The following files have been created by ResourcefulRoutes (using standard mojolicious config):
 
@@ -51,7 +63,7 @@ The following files have been created by ResourcefulRoutes (using standard mojol
     /test/templates/users/create_form.html.ep
     /test/templates/users/update_form.html.ep
 
-5.) Create a resource in the routes file located at "/test/lib/Test.pm"
+6.) Create a resource in the routes file located at "/test/lib/Test.pm"
 by adding to the startup method:
 
     $self->plugin('resourceful_routes');
@@ -97,20 +109,20 @@ on each start of your app:
           ->name('users_delete');
 
 
-6.) Start your app:
+7.) Start your app:
 
     perl script/test daemon --reload
 
-7.) Enter one of the following URLs to see the result:
+8.) Enter one of the following URLs to see the result:
 
     http://localhost:3000/users
     http://localhost:3000/users/123
     http://localhost:3000/users/123/edit
     http://localhost:3000/users/new
 
-8.) Add database access, change template, configure everything as you need it
+9.) Add database access, change template, configure everything as you need it
 
-9.) Note: as PUT and DELETE methods are not supported by old HTML standard, you
+10.) Note: as PUT and DELETE methods are not supported by old HTML standard, you
 have to add a hidden parameter in your update and delete forms:
 <input type="hidden" name="_method" value="put" />
 <input type="hidden" name="_method" value="delete" />
