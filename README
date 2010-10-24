@@ -4,6 +4,8 @@ can give you a deeper understanding of how plugins and helpers work in
 Mojolicious and it also provides you with a suggestion how to create a bunch
 of RESTful routes with a single command.
 
+NOTE: use the latest Github version of mojolicious, as code is changing quickly!
+
 
 ResourcefulRoutes Summary
 ---------------------------
@@ -48,7 +50,7 @@ we add
 to the beginning of the startup method in the routes file.
 
 
-5.) Create a resource
+5.) Create a resource names "users"
 
 Make sure that you are still in the Test folder (NOT the lib folder).
 
