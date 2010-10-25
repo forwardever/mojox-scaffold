@@ -58,6 +58,10 @@ sub run {
     $self->render_to_rel_file('controller', $resource->{paths}->{ctrl}, $resource);
 
 
+    # Create a test file
+    $self->render_to_rel_file('test', $resource->{paths}->{test}, $resource);
+
+
     # Create template files
     my $tmpl_path = $resource->{paths}->{tmpl};
     my $layout_path = $resource->{paths}->{layout};
@@ -67,6 +71,13 @@ sub run {
     $self->render_to_rel_file('show',        $tmpl_path.'/show.html.ep', $resource);
     $self->render_to_rel_file('create_form', $tmpl_path.'/create_form.html.ep', $resource);
     $self->render_to_rel_file('update_form', $tmpl_path.'/update_form.html.ep', $resource);
+
+
+    # Info
+    print qq|Make sure that the following command can be found in the |.
+          qq|startup method of your routing file:\n|.
+          qq|    \$self->plugin('resourceful_routes');\n|.
+          qq|    \$self->resources('$resource->{name}');|;
 
 }
 
@@ -210,12 +221,23 @@ sub get_paths {
     # Layout path
     my $layout_path = $tmpl_base.'/layouts';
 
+    # Test path
+    my $test_path = '/t/'.join('/', split(/-/, $resource_name) ).'/standard.t';
+
+    # Dispatch path
+    my $dispatch_path = '/'.join('/', split(/-/, $resource_name) );
+
+    # Resource last name
+    my @resource_name_parts = split(/-/, $resource_name);
+    my $last_name           = $resource_name_parts[-1];
+
     # Save paths to resource hash ref
     $resource->{paths} = {
         ctrl      => $ctrl_path,
         tmpl      => $tmpl_path,
         layout    => $layout_path,
-        tmpl_base => $tmpl_base
+        test      => $test_path,
+        tmpl_base => $tmpl_base,
     };
 
     # Save app name to resource hash ref
@@ -224,7 +246,9 @@ sub get_paths {
     };
 
     # Save resource class
-    $resource->{class} = $resource_class;
+    $resource->{class}         = $resource_class;
+    $resource->{dispatch_path} = $dispatch_path;
+    $resource->{last_name}     = $last_name;
 
 }
 
@@ -267,8 +291,7 @@ __DATA__
 %% my $resource       = shift;
 %% my $res_name       = $resource->{name};
 %% my $form_fields    = $resource->{form_fields};
-%% my @res_name_parts = split(/-/,$res_name);
-%% my $res_name_last  = $res_name_parts[-1];
+%% my $res_last_name  = $resource->{last_name};
 
 % layout 'resources', title => 'Index';
     <h1>List <%%= $res_name %%></h1><br />
@@ -281,7 +304,7 @@ __DATA__
         <th>Edit</th>
         <th>View</th>
       </tr>
-      % foreach my $item (@$<%%= $res_name_last %%>){
+      % foreach my $item (@$<%%= $res_last_name %%>){
       <tr>
         %% foreach my $form_field (@$form_fields) {
         <td><%= $item->{<%%= $form_field->{name} %%>} %></td>
@@ -294,7 +317,7 @@ __DATA__
         </td>
       </tr>
       % }
-      % if (!$<%%= $res_name_last %%> || !@$<%%= $res_name_last %%>) {
+      % if (!$<%%= $res_last_name %%> || !@$<%%= $res_last_name %%>) {
       <tr>
         <td colspan="<%%= @$form_fields+2 %%>">No Results</td>
       </tr>
@@ -424,10 +447,9 @@ __DATA__
 
 %%############################################################################
 @@ controller
-%% my $resource = shift;
+%% my $resource         = shift;
 %% my $form_fields_list = join (',', map { '"'.$_.'"' } @{$resource->{form_field_names}});
-%% my @res_name_parts = split(/-/,$resource->{name});
-%% my $res_name_last = $res_name_parts[-1];
+%% my $res_last_name    = $resource->{last_name};
 package <%%= $resource->{class} %%>;
 
 use strict;
@@ -436,7 +458,7 @@ use warnings;
 use base 'Mojolicious::Controller';
 
 # can be deleted after you have implemented your database
-my @<%%= $res_name_last %%>;
+my @<%%= $res_last_name %%>;
 my $counter = 0;
 
 
@@ -447,7 +469,7 @@ sub index {
     # Save each row from the DB into a hash (column name is hash key, column value is hash value)
     # and push the hash reference into an array
 
-    $self->stash(<%%= $res_name_last %%> => \@<%%= $res_name_last %%> );
+    $self->stash(<%%= $res_last_name %%> => \@<%%= $res_last_name %%> );
 
 }
 
@@ -459,7 +481,7 @@ sub show {
     my $id = $self->stash('id');
 
     # Read existing data from a database (from hash for sake of simplicity in this example)
-    my $item = $<%%= $res_name_last %%>[$id-1];
+    my $item = $<%%= $res_last_name %%>[$id-1];
 
     # and save it to the stash to make it available in the template show.html.ep
     $self->stash(item => $item);
@@ -479,7 +501,7 @@ sub update_form {
     my $id = $self->stash('id');
 
     # Read existing data from a database (from hash for sake of simplicity in this example)
-    my $item = $<%%= $res_name_last %%>[$id-1];
+    my $item = $<%%= $res_last_name %%>[$id-1];
 
     # and save it to the stash to make it available in the template update_form.html.ep
     $self->stash(item => $item);
@@ -505,8 +527,8 @@ sub create {
         $data{$field_name} = $self->req->param($field_name);
     }
 
-    # save row to <%%= $res_name_last %%> hash
-    push @<%%= $res_name_last %%>, {%data};
+    # save row to <%%= $res_last_name %%> hash
+    push @<%%= $res_last_name %%>, {%data};
 
 
     # and redirect to "show" in order to display the created resource
@@ -522,7 +544,7 @@ sub update {
     my $id = $self->stash('id');
 
     # Read existing data from a database (from hash for sake of simplicity in this example)
-    my $item = $<%%= $res_name_last %%>[$id-1];
+    my $item = $<%%= $res_last_name %%>[$id-1];
 
     # List of all field names
     my @form_fields = (<%%=$form_fields_list%%>);
@@ -542,6 +564,135 @@ sub delete {
     my $self = shift;
     # TO DO
 }
+
+1;
+
+
+%%############################################################################
+@@ test
+%% my $resource = shift;
+%% my @form_fields   = @{$resource->{form_fields}};
+%% my $dispatch_path = $resource->{dispatch_path};
+%% my $test_num = 16 + @form_fields * 5;
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Test::More;
+use Test::Mojo;
+
+plan tests => <%%= $test_num %%>;
+
+my $t = Test::Mojo->new(app => '<%%= $resource->{app}->{name} %%>');
+
+
+################
+# Prepare data
+
+# Define field names and sample data (hash ref)
+my $fields = {
+%% foreach my $field (@form_fields) {
+    %% my $value = $field->{type} eq 'text' || $field->{type} eq 'string' ? $field->{name}.'_value' : 1;
+    <%%= $field->{name} %%> => '<%%= $value %%>',
+%% }
+};
+
+
+# For updates, we modify field values a bit (append "_edit" or add 1)
+my $fields_put = {};
+while (my ($key, $value) = each (%$fields)) {
+    if ($value eq 1){
+        $fields_put->{$key} = $value+1;
+    }
+    else {
+        $fields_put->{$key} = $value.'_edit';
+    }
+}
+# ... and add a method field to allow Mojolicious to transform our post
+# request to a put request
+$fields_put->{_method} = 'put';
+
+
+################
+### GET request dispatched to CREATE_FORM method
+$t->get_ok('<%%= $dispatch_path %%>/new')
+  ->status_is(200);
+
+# look for form fields
+foreach my $key (keys %$fields) {
+    my $search_key = quotemeta( qq|name="$key"| );
+    $t->content_like(qr/$search_key/s);
+}
+
+
+################
+### POST request to create a new entry
+$t->post_form_ok('<%%= $dispatch_path %%>', $fields)
+  ->status_is(302) # 302 redirect
+  ->header_like('location' => qr|<%%= $dispatch_path %%>/1|);
+
+
+################
+### GET request dispatched to SHOW method
+$t->get_ok('<%%= $dispatch_path %%>/1')
+  ->status_is(200);
+
+# look for field_name + any number of characters (incl. line breaks) + field_value
+while (my ($key, $value) = each (%$fields) ) {
+    my $search_key   = quotemeta($key);
+    my $search_value = quotemeta($value);
+    $t->content_like(qr/$search_key.*$search_value/s);
+}
+
+
+################
+### GET request dispatched to INDEX method
+$t->get_ok('<%%= $dispatch_path %%>')
+  ->status_is(200);
+
+# look for field_name + any number of characters (incl. line breaks) + field_value
+while (my ($key, $value) = each (%$fields) ) {
+    my $search_key   = quotemeta($key);
+    my $search_value = quotemeta($value);
+    $t->content_like(qr/$search_key.*$search_value/s);
+}
+
+
+################
+### GET request dispatched to UPDATE_FORM method
+$t->get_ok('<%%= $dispatch_path %%>/1/edit')
+  ->status_is(200);
+
+# look for form field names and values
+while (my ($key, $value) = each (%$fields) ) {
+    my $search_key   = quotemeta( qq|name="$key"| );
+    my $search_value = quotemeta( $value );
+    $t->content_like(qr/$search_key.*$search_value/s);
+}
+
+
+################
+### POST/PUT request dispatched to UPDATE method
+
+$t->post_form_ok('<%%= $dispatch_path %%>/1', $fields_put)
+  ->status_is(302)
+  ->header_like('location' => qr|<%%= $dispatch_path %%>/1|);
+
+
+################
+### GET request dispatched to SHOW method
+$t->get_ok('<%%= $dispatch_path %%>/1')
+  ->status_is(200);
+
+# look for field_name + any number of characters (incl. line breaks) + field_value
+while (my ($key, $value) = each (%$fields_put) ) {
+    next if $key eq '_method';
+    my $search_key   = quotemeta($key);
+    my $search_value = quotemeta($value);
+    $t->content_like(qr/$search_key.*$search_value/s);
+}
+
 
 1;
 
