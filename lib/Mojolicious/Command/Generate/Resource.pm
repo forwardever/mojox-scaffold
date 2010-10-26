@@ -307,16 +307,16 @@ sub validate_paths {
     }
 
     # Make sure template path does not already exists
-    #if ( -e $tmpl_path ){
-    #    die qq|Template path "$tmpl_path" already exists. Resource could |.
-    #        qq|NOT be created!|;
-    #}
+    if ( -e $tmpl_path ){
+        die qq|Template path "$tmpl_path" already exists. Resource could |.
+            qq|NOT be created!|;
+    }
 
     # Make sure controller file does not already exists
-    #if ( -e $ctrl_path ){
-    #    die qq|Controller file $ctrl_path already exists. Resource could |.
-    #        qq|NOT be created!|;
-    #}
+    if ( -e $ctrl_path ){
+        die qq|Controller file $ctrl_path already exists. Resource could |.
+            qq|NOT be created!|;
+    }
 }
 
 
