@@ -44,6 +44,9 @@ sub run {
     # Create Model
     $self->create_model($resource);
 
+    # Create Templates
+    $self->create_templates($resource);
+
 
     # Config path
     # my $conf_path = 'config/resources/'.$res_name.'.conf';
@@ -69,7 +72,7 @@ sub run {
     my $tmpl_path = $resource->{paths}->{tmpl};
     my $layout_path = $resource->{paths}->{layout};
 
-    $self->render_to_rel_file('layout',      $layout_path.'/resources.html.ep');
+    $self->render_to_rel_file('layout',      $layout_path.'/resources.html.ep', $resource);
     $self->render_to_rel_file('index',       $tmpl_path.'/index.html.ep', $resource);
     $self->render_to_rel_file('show',        $tmpl_path.'/show.html.ep', $resource);
     $self->render_to_rel_file('create_form', $tmpl_path.'/create_form.html.ep', $resource);
@@ -346,173 +349,68 @@ sub create_model {
 }
 
 
+sub create_templates {
+    my $self     = shift;
+    my $resource = shift;
+
+    my $tmpl = $resource->{options}->{tmpl} || 'embedded_perl';
+
+    my $tmpl_class = 'MojoX::Scaffold::Template::'.Mojo::ByteStream->new($tmpl)->camelize
+      ->to_string;
+
+    my $tmpl_path = $self->class_to_path($tmpl_class);
+
+    eval {require $tmpl_path} || die $@;
+
+    my $tmpl_code = $tmpl_class->new(resource => $resource);
+
+    $resource->{tmpl_code}->{index}       = $tmpl_code->index;
+    $resource->{tmpl_code}->{show}        = $tmpl_code->show;
+    $resource->{tmpl_code}->{create_form} = $tmpl_code->create_form;
+    $resource->{tmpl_code}->{update_form} = $tmpl_code->update_form;
+    $resource->{tmpl_code}->{layout}      = $tmpl_code->layout;
+
+}
+
 1;
 
 
 __DATA__
 
+
 %%############################################################################
 @@ index
-%% my $resource       = shift;
-%% my $res_name       = $resource->{name};
-%% my $form_fields    = $resource->{form_fields};
-%% my $res_last_name  = $resource->{last_name};
-
-% layout 'resources', title => 'Index';
-    <h1>List <%%= $res_name %%></h1><br />
-
-    <table>
-      <tr>
-        %% foreach my $form_field (@$form_fields) {
-        <th><%%= $form_field->{name} %%></th>
-        %% }
-        <th>Edit</th>
-        <th>View</th>
-      </tr>
-      % foreach my $item (@$<%%= $res_last_name %%>){
-      <tr>
-        %% foreach my $form_field (@$form_fields) {
-        <td><%= $item->{<%%= $form_field->{name} %%>} %></td>
-        %% }
-        <td>
-          <%= link_to 'Edit' => '<%%= $res_name %%>_update_form', { id => $item->{id} } %>
-        </td>
-        <td>
-          <%= link_to 'View' => '<%%= $res_name %%>_show', { id => $item->{id} } %>
-        </td>
-      </tr>
-      % }
-      % if (!$<%%= $res_last_name %%> || !@$<%%= $res_last_name %%>) {
-      <tr>
-        <td colspan="<%%= @$form_fields+2 %%>">No Results</td>
-      </tr>
-      % }
-    </table>
-
-    <br />
-    <%= link_to 'Index' => '<%%= $res_name %%>_index' %>
-    <%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
+%% my $resource = shift;
+<%%= $resource->{tmpl_code}->{index} %%>
 
 
 %%############################################################################
 @@ show
-%% my $resource    = shift;
-%% my $res_name    = $resource->{name};
-%% my $form_fields = $resource->{form_fields};
-% layout 'resources', title => 'Show';
-<h1>Show one item of <%%= $res_name %%></h1><br />
-
-<table>
-    %% foreach my $form_field (@$form_fields) {
-    <tr>
-        <td>
-            <%%=$form_field->{name}%%>
-        </td>
-        <td>
-            <%= $item->{<%%=$form_field->{name}%%>} %>
-        </td>
-    </tr>
-
-    %% }
-</table>
-
-<br />
-<%= link_to 'Index' => '<%%= $res_name %%>_index' %>
-<%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
-<%= link_to 'Edit'  => '<%%= $res_name %%>_update_form', { id => $item->{id} } %>
+%% my $resource = shift;
+<%%= $resource->{tmpl_code}->{show} %%>
 
 
 %%############################################################################
 @@ create_form
-%% my $resource    = shift;
-%% my $res_name    = $resource->{name};
-%% my $form_fields = $resource->{form_fields};
-% layout 'resources', title => 'Create Form';
-
-<h1>Create a new item of <%%= $res_name %%></h1><br />
-<%= form_for '<%%= $res_name %%>_create', method => 'post' => begin %>
-  %% foreach my $field (@$form_fields) {
-  %% if ($field->{type} eq 'string' || $field->{type} eq 'int') {
-    <%%= $field->{name} %%>:<br />
-    <%= text_field '<%%= $field->{name} %%>', value => '' %><br /><br />
-  %% }
-  %% elsif ($field->{type} eq 'text') {
-    <%%= $field->{name} %%>:<br />
-    <%= text_area <%%= $field->{name} %%> => begin %><% end %><br /><br />
-  %% }
-  %% }
-    <%= submit_button 'Create' %>
-<% end %>
-
-<br />
-<%= link_to 'Index' => '<%%= $res_name %%>_index' %>
-<%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
+%% my $resource = shift;
+<%%= $resource->{tmpl_code}->{create_form} %%>
 
 
 %%############################################################################
 @@ update_form
-%% my $resource    = shift;
-%% my $res_name    = $resource->{name};
-%% my $form_fields = $resource->{form_fields};
-% layout 'resources', title => 'Update Form';
-
-<h1>Edit one item of <%%= $res_name %%></h1><br />
-
-<%= form_for '<%%= $res_name %%>_update', {id => $id}, method => 'post' => begin %>
-  %% foreach my $field (@$form_fields) {
-  %% if ($field->{type} eq 'string' || $field->{type} eq 'int') {
-    <%%= $field->{name} %%>:<br />
-    <%= text_field '<%%= $field->{name} %%>', value => $item->{<%%= $field->{name} %%>} %><br /><br />
-  %% }
-  %% elsif ($field->{type} eq 'text') {
-    <%%= $field->{name} %%>:<br />
-    <%= text_area <%%= $field->{name} %%> => begin %><%=$item->{<%%= $field->{name} %%>}%><% end %><br /><br />
-  %% }
-  %% }
-    <%= hidden_field '_method' => 'put' %><br />
-    <%= submit_button 'Update' %>
-<% end %>
-
-<br />
-<%= link_to 'Index' => '<%%= $res_name %%>_index' %>
-<%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
+%% my $resource = shift;
+<%%= $resource->{tmpl_code}->{update_form} %%>
 
 
 %%############################################################################
 @@ layout
-<!doctype html>
-  <html>
-    <head>
-      <title>
-        <%= $title %>
-      </title>
-      <style type="text/css">
-        body, p, th, td {
-          font-family: arial, verdana, helvetica, sans-serif;
-          font-size:   14px;
-        }
-        table {
-          border-collapse: collapse;
-          border-color: #C0C0C0;
-          border-width: 0 0 1px 1px;
-          border-style: solid;
-        }
-        th, td {
-          border-collapse: collapse;
-          border-color: #C0C0C0;
-          border-width: 1px 1px 0 0;
-          border-style: solid;
-          padding:4px;
-        }
-      </style>
-    </head>
-  <body><%= content %></body>
-</html>
+%% my $resource = shift;
+<%%= $resource->{tmpl_code}->{layout} %%>
 
 
 %%############################################################################
 @@ controller
-%% my $resource         = shift;
+%% my $resource = shift;
 %% my $form_fields_list = join (',', map { '"'.$_.'"' } @{$resource->{form_field_names}});
 %% my $res_last_name    = $resource->{last_name};
 package <%%= $resource->{class} %%>;
