@@ -638,11 +638,17 @@ $t->element_exists('input[name="<%%= $field->{name} %%>"]');
 ### POST create
 $t->post_form_ok('<%%= $dispatch_path %%>', $sample_data)
   ->status_is(302) # redirect
-  ->header_like('location' => qr|<%%= $dispatch_path %%>/1|);
+  ->header_like('location' => qr|<%%= $dispatch_path %%>/(\w)|);
+
+
+# Get generated ID from redirect URL
+my $redirect = scalar $t->tx->res->headers->header('location');
+$redirect =~m/\/(\w)$/;
+my $id = $1;
 
 
 ### GET show
-$t->get_ok('<%%= $dispatch_path %%>/1')
+$t->get_ok("<%%= $dispatch_path %%>/$id")
   ->status_is(200);
 
 %% foreach my $field (@form_fields) {
@@ -662,7 +668,7 @@ $t->content_like(qr/<%%= $search_value %%>/s);
 
 
 ### GET update_form
-$t->get_ok('<%%= $dispatch_path %%>/1/edit')
+$t->get_ok("<%%= $dispatch_path %%>/$id/edit")
   ->status_is(200);
 
 %% foreach my $field (@form_fields) {
@@ -676,13 +682,13 @@ $t->element_exists('input[name="<%%= $field->{name} %%>"][value="<%%= $field->{s
 
 
 ### PUT update
-$t->post_form_ok('<%%= $dispatch_path %%>/1', $sample_data_modified)
+$t->post_form_ok("<%%= $dispatch_path %%>/$id", $sample_data_modified)
   ->status_is(302)
   ->header_like('location' => qr|<%%= $dispatch_path %%>/1|);
 
 
 ### GET show
-$t->get_ok('<%%= $dispatch_path %%>/1')
+$t->get_ok("<%%= $dispatch_path %%>/$id")
   ->status_is(200);
 
 %% foreach my $field (@form_fields) {
