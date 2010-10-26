@@ -178,7 +178,12 @@ sub validate_params {
         }
         # Save data fields
         else {
-            push @data_fields, {name => $name, type => $type};
+            push @data_fields, {
+                name                 => $name,
+                type                 => $type,
+                sample_data          => sample_data_by_type($name,$type),
+                sample_data_modified => sample_data_by_type($name,$type,1),
+            };
         }
     }
 
@@ -186,6 +191,23 @@ sub validate_params {
     $resource->{options}       = {%options};
     $resource->{data_fields}   = [@data_fields];
 
+}
+
+sub sample_data_by_type {
+    my $name     = shift;
+    my $type     = shift;
+    my $modified = shift;
+
+    if ($type eq 'string' || $type eq 'text'){
+        return $name.'_value' unless $modified;
+        return $name.'_value_modified';
+    }
+    elsif ($type eq 'int'){
+        return 13 unless $modified;
+        return 14;
+    }
+
+    1;
 }
 
 
@@ -570,10 +592,12 @@ sub delete {
 
 %%############################################################################
 @@ test
-%% my $resource = shift;
-%% my @form_fields   = @{$resource->{form_fields}};
-%% my $dispatch_path = $resource->{dispatch_path};
-%% my $test_num = 16 + @form_fields * 5;
+%% my $resource             = shift;
+%% my @form_fields          = @{$resource->{form_fields}};
+%% my $dispatch_path        = $resource->{dispatch_path};
+%% my $test_num             = 16 + @form_fields * 5;
+%% my $sample_data          = join(",\n    ", map { $_->{name}." => '".$_->{sample_data}."'" } @form_fields);
+%% my $sample_data_modified = join(",\n    ", map { $_->{name}." => '".$_->{sample_data_modified}."'" } @form_fields);
 #!/usr/bin/env perl
 
 use strict;
@@ -586,112 +610,85 @@ plan tests => <%%= $test_num %%>;
 
 my $t = Test::Mojo->new(app => '<%%= $resource->{app}->{name} %%>');
 
+# Sample Data
+my $sample_data = {
+    <%%= $sample_data %%>
+};
 
-################
-# Prepare data
-
-# Define field names and sample data (hash ref)
-my $fields = {
-%% foreach my $field (@form_fields) {
-    %% my $value = $field->{type} eq 'text' || $field->{type} eq 'string' ? $field->{name}.'_value' : 1;
-    <%%= $field->{name} %%> => '<%%= $value %%>',
-%% }
+my $sample_data_modified = {
+    _method => 'put', # NEEDED TO TRANSFORM POST TO PUT REQUESTS
+    <%%= $sample_data_modified %%>
 };
 
 
-# For updates, we modify field values a bit (append "_edit" or add 1)
-my $fields_put = {};
-while (my ($key, $value) = each (%$fields)) {
-    if ($value eq 1){
-        $fields_put->{$key} = $value+1;
-    }
-    else {
-        $fields_put->{$key} = $value.'_edit';
-    }
-}
-# ... and add a method field to allow Mojolicious to transform our post
-# request to a put request
-$fields_put->{_method} = 'put';
-
-
-################
-### GET request dispatched to CREATE_FORM method
+### GET create_form
 $t->get_ok('<%%= $dispatch_path %%>/new')
   ->status_is(200);
 
-# look for form fields
-foreach my $key (keys %$fields) {
-    my $search_key = quotemeta( qq|name="$key"| );
-    $t->content_like(qr/$search_key/s);
-}
+%% foreach my $field (@form_fields) {
+    %% if ($field->{type} eq 'text') {
+$t->text_is('textarea[name="<%%= $field->{name} %%>"]' => '');
+    %% }
+    %% else {
+$t->element_exists('input[name="<%%= $field->{name} %%>"]');
+    %% }
+%% }
 
 
-################
-### POST request to create a new entry
-$t->post_form_ok('<%%= $dispatch_path %%>', $fields)
-  ->status_is(302) # 302 redirect
+### POST create
+$t->post_form_ok('<%%= $dispatch_path %%>', $sample_data)
+  ->status_is(302) # redirect
   ->header_like('location' => qr|<%%= $dispatch_path %%>/1|);
 
 
-################
-### GET request dispatched to SHOW method
+### GET show
 $t->get_ok('<%%= $dispatch_path %%>/1')
   ->status_is(200);
 
-# look for field_name + any number of characters (incl. line breaks) + field_value
-while (my ($key, $value) = each (%$fields) ) {
-    my $search_key   = quotemeta($key);
-    my $search_value = quotemeta($value);
-    $t->content_like(qr/$search_key.*$search_value/s);
-}
+%% foreach my $field (@form_fields) {
+%%    my $search_value = quotemeta($field->{sample_data});
+$t->content_like(qr/<%%= $search_value %%>/s);
+%%}
 
 
-################
-### GET request dispatched to INDEX method
+### GET index
 $t->get_ok('<%%= $dispatch_path %%>')
   ->status_is(200);
 
-# look for field_name + any number of characters (incl. line breaks) + field_value
-while (my ($key, $value) = each (%$fields) ) {
-    my $search_key   = quotemeta($key);
-    my $search_value = quotemeta($value);
-    $t->content_like(qr/$search_key.*$search_value/s);
-}
+%% foreach my $field (@form_fields) {
+%%    my $search_value = quotemeta($field->{sample_data});
+$t->content_like(qr/<%%= $search_value %%>/s);
+%%}
 
 
-################
-### GET request dispatched to UPDATE_FORM method
+### GET update_form
 $t->get_ok('<%%= $dispatch_path %%>/1/edit')
   ->status_is(200);
 
-# look for form field names and values
-while (my ($key, $value) = each (%$fields) ) {
-    my $search_key   = quotemeta( qq|name="$key"| );
-    my $search_value = quotemeta( $value );
-    $t->content_like(qr/$search_key.*$search_value/s);
-}
+%% foreach my $field (@form_fields) {
+    %% if ($field->{type} eq 'text') {
+$t->text_is('textarea[name="<%%= $field->{name} %%>"]' => "<%%= $field->{sample_data} %%>");
+    %% }
+    %% else {
+$t->element_exists('input[name="<%%= $field->{name} %%>"][value="<%%= $field->{sample_data} %%>"]');
+    %% }
+%% }
 
 
-################
-### POST/PUT request dispatched to UPDATE method
-
-$t->post_form_ok('<%%= $dispatch_path %%>/1', $fields_put)
+### PUT update
+$t->post_form_ok('<%%= $dispatch_path %%>/1', $sample_data_modified)
   ->status_is(302)
   ->header_like('location' => qr|<%%= $dispatch_path %%>/1|);
 
 
-################
-### GET request dispatched to SHOW method
+### GET show
 $t->get_ok('<%%= $dispatch_path %%>/1')
   ->status_is(200);
 
-# look for field_name + any number of characters (incl. line breaks) + field_value
-while (my ($key, $value) = each (%$fields_put) ) {
-    next if $key eq '_method';
-    my $search_key   = quotemeta($key);
-    my $search_value = quotemeta($value);
-    $t->content_like(qr/$search_key.*$search_value/s);
-}
+%% foreach my $field (@form_fields) {
+%%    my $search_value = quotemeta($field->{sample_data_modified});
+$t->content_like(qr/<%%= $search_value %%>/s);
+%% }
 
 
 1;
