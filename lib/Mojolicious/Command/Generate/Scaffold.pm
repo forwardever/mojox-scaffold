@@ -1,4 +1,4 @@
-package Mojolicious::Command::Generate::Resource;
+package Mojolicious::Command::Generate::Scaffold;
 
 use strict;
 use warnings;
