@@ -3,5 +3,11 @@ Changes
 MANIFEST
 README
 lib/Mojolicious/Plugin/ResourcefulRoutes.pm
-lib/Mojolicious/Command/Generate/Resource.pm
+lib/Mojolicious/Plugin/ModelInstance.pm
+lib/Mojolicious/Command/Generate/Scaffold.pm
+lib/MojoX/Scaffold/Model.pm
+lib/MojoX/Scaffold/Template.pm
+lib/MojoX/Scaffold/Model/DBI.pm
+lib/MojoX/Scaffold/Model/ObjectDB.pm
+lib/MojoX/Scaffold/Template/EmbeddedPerl.pm
 MYMETA.yml

@@ -7,7 +7,7 @@ use base 'Mojolicious::Plugin';
 
 use Mojo::ByteStream;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub register {
     my ($self, $app) = @_;
@@ -86,8 +86,8 @@ sub generate_routes {
 
         # GET /article/new - form for create an article
         $r->route("/$path/new")->via('get')
-          ->to(controller => $ctrl, action => "create_form")
-          ->name($name . "_create_form");
+          ->to(controller => $ctrl, action => "new_form")
+          ->name($name . "_new_form");
 
         # GET /article - show article
         $r->route("/$path")->via('get')
@@ -95,8 +95,8 @@ sub generate_routes {
 
         # GET /article/edit - form for update an article
         $r->route("/$path/edit")->via('get')
-          ->to(controller => $ctrl, action => "update_form")
-          ->name($name . "_update_form");
+          ->to(controller => $ctrl, action => "edit_form")
+          ->name($name . "_edit_form");
 
         # POST /article - create article
         $r->route("/$path")->via('post')
@@ -119,8 +119,8 @@ sub generate_routes {
 
         # GET /articles/new - form for create an article
         $r->route("/$path/new")->via('get')
-          ->to(controller => $ctrl, action => "create_form")
-          ->name($name . "_create_form");
+          ->to(controller => $ctrl, action => "new_form")
+          ->name($name . "_new_form");
 
         # GET /articles/123 - show article with id 123
         $r->route("/$path/:id")->via('get')
@@ -128,8 +128,8 @@ sub generate_routes {
 
         # GET /articles/123/edit - form for update an article
         $r->route("/$path/:id/edit")->via('get')
-          ->to(controller => $ctrl, action => "update_form")
-          ->name($name . "_update_form");
+          ->to(controller => $ctrl, action => "edit_form")
+          ->name($name . "_edit_form");
 
         # GET /articles - list of all articles
         $r->route("/$path")->via('get')

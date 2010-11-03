@@ -1,3 +1,9 @@
+0.04    2010-11-03 00:00:00
+        - Added step-by-step config
+        - Added dbi support
+        - Added object-db support
+        - Removed pure perl support
+
 0.03    2010-10-26 00:00:00
         - Improved template scaffolding (tag helpers)
         - Improved controller scaffolding (working model using a perl class array)

@@ -17,12 +17,12 @@ sub show {
     die 'no show method defined';
 }
 
-sub create_form {
-    die 'no create_form method defined';
+sub new_form {
+    die 'no new_form method defined';
 }
 
-sub update_form {
-    die 'no update_form method defined';
+sub edit_form {
+    die 'no edit_form method defined';
 }
 
 sub create {
@@ -35,6 +35,9 @@ sub update {
 
 sub delete {
     die 'no delete method defined';
+}
+
+sub source {
 }
 
 sub change_tags {

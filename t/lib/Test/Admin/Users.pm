@@ -20,14 +20,14 @@ sub show {
 }
 
 
-sub create_form {
+sub new_form {
     my $self = shift;
     my $route_name = $self->match->endpoint->name;
     $self->stash(route_name => $route_name);
 }
 
 
-sub update_form {
+sub edit_form {
     my $self = shift;
     my $route_name = $self->match->endpoint->name;
     $self->stash(route_name => $route_name);

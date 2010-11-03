@@ -1,1 +1,0 @@
-Template for displaying a form that allows to edit an existing resource item! Route name: <%= $route_name =>

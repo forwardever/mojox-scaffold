@@ -21,16 +21,16 @@ sub show {
 
 }
 
-sub create_form {
+sub new_form {
     my $self = shift;
     $self->change_tags;
-    return $self->render_data('create_form', $self->resource);
+    return $self->render_data('new_form', $self->resource);
 }
 
-sub update_form {
+sub edit_form {
     my $self = shift;
     $self->change_tags;
-    return $self->render_data('update_form', $self->resource);
+    return $self->render_data('edit_form', $self->resource);
 }
 
 sub layout {
@@ -38,6 +38,7 @@ sub layout {
     $self->change_tags;
     return $self->render_data('layout', $self->resource);
 }
+
 
 
 1;
@@ -49,12 +50,11 @@ __DATA__
 %%############################################################################
 @@ index
 %% my $resource       = shift;
-%% my $res_name       = $resource->{name};
 %% my $form_fields    = $resource->{form_fields};
-%% my $res_last_name  = $resource->{last_name};
+%% my $item_accessor  = $resource->{model}->{code}->{item_accessor};
 
     % layout 'resources', title => 'Index';
-    <h1>List <%%= $res_name %%></h1><br />
+    <h1>List <%%= $resource->{name} %%></h1><br />
 
     <table>
       <tr>
@@ -64,20 +64,20 @@ __DATA__
         <th>Edit</th>
         <th>View</th>
       </tr>
-      % foreach my $item (@$<%%= $res_last_name %%>){
+      % <%%= $resource->{model}->{code}->{loop} %%>
       <tr>
         %% foreach my $form_field (@$form_fields) {
-        <td><%= $item->{<%%= $form_field->{name} %%>} %></td>
+        <td><%= <%%= $item_accessor->($form_field->{name}) %%> %></td>
         %% }
         <td>
-          <%= link_to 'Edit' => '<%%= $res_name %%>_update_form', { id => $item->{id} } %>
+          <%= link_to 'Edit' => '<%%= $resource->{name} %%>_edit_form', { id => <%%= $item_accessor->('id') %%> } %>
         </td>
         <td>
-          <%= link_to 'View' => '<%%= $res_name %%>_show', { id => $item->{id} } %>
+          <%= link_to 'View' => '<%%= $resource->{name} %%>_show', { id => <%%= $item_accessor->('id') %%> } %>
         </td>
       </tr>
       % }
-      % if (!$<%%= $res_last_name %%> || !@$<%%= $res_last_name %%>) {
+      % unless ( <%%= $resource->{model}->{code}->{number_of_rows} %%> ) {
       <tr>
         <td colspan="<%%= @$form_fields+2 %%>">No Results</td>
       </tr>
@@ -85,19 +85,19 @@ __DATA__
     </table>
 
     <br />
-    <%= link_to 'Index' => '<%%= $res_name %%>_index' %>
-    <%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
+    <%= link_to 'Index' => '<%%= $resource->{name} %%>_index' %>
+    <%= link_to 'New'   => '<%%= $resource->{name} %%>_new_form' %>
 
 
 
 %%############################################################################
 @@ show
 %% my $resource    = shift;
-%% my $res_name    = $resource->{name};
-%% my $form_fields = $resource->{form_fields};
+%% my $form_fields   = $resource->{form_fields};
+%% my $item_accessor = $resource->{model}->{code}->{item_accessor};
 
     % layout 'resources', title => 'Show';
-    <h1>Show one item of <%%= $res_name %%></h1><br />
+    <h1>Show one item of <%%= $resource->{name} %%></h1><br />
     
     <table>
         %% foreach my $form_field (@$form_fields) {
@@ -106,29 +106,28 @@ __DATA__
                 <%%=$form_field->{name}%%>
             </td>
             <td>
-                <%= $item->{<%%=$form_field->{name}%%>} %>
+                <%= <%%= $item_accessor->($form_field->{name}) %%> %>
             </td>
         </tr>
     
         %% }
     </table>
-    
+
     <br />
-    <%= link_to 'Index' => '<%%= $res_name %%>_index' %>
-    <%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
-    <%= link_to 'Edit'  => '<%%= $res_name %%>_update_form', { id => $item->{id} } %>
+    <%= link_to 'Index' => '<%%= $resource->{name} %%>_index' %>
+    <%= link_to 'New'   => '<%%= $resource->{name} %%>_new_form' %>
+    <%= link_to 'Edit'  => '<%%= $resource->{name} %%>_edit_form', { id => <%%= $item_accessor->('id') %%> } %>
 
 
 %%############################################################################
-@@ create_form
+@@ new_form
 %% my $resource    = shift;
-%% my $res_name    = $resource->{name};
 %% my $form_fields = $resource->{form_fields};
 
     % layout 'resources', title => 'Create Form';
     
-    <h1>Create a new item of <%%= $res_name %%></h1><br />
-    <%= form_for '<%%= $res_name %%>_create', method => 'post' => begin %>
+    <h1>Create a new item of <%%= $resource->{name} %%></h1><br />
+    <%= form_for '<%%= $resource->{name} %%>_create', method => 'post' => begin %>
       %% foreach my $field (@$form_fields) {
       %% if ($field->{type} eq 'string' || $field->{type} eq 'int') {
         <%%= $field->{name} %%>:<br />
@@ -143,29 +142,29 @@ __DATA__
     <% end %>
     
     <br />
-    <%= link_to 'Index' => '<%%= $res_name %%>_index' %>
-    <%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
+    <%= link_to 'Index' => '<%%= $resource->{name} %%>_index' %>
+    <%= link_to 'New'   => '<%%= $resource->{name} %%>_new_form' %>
 
 
 
 %%############################################################################
-@@ update_form
-%% my $resource    = shift;
-%% my $res_name    = $resource->{name};
-%% my $form_fields = $resource->{form_fields};
+@@ edit_form
+%% my $resource      = shift;
+%% my $form_fields   = $resource->{form_fields};
+%% my $item_accessor = $resource->{model}->{code}->{item_accessor};
     % layout 'resources', title => 'Update Form';
     
-    <h1>Edit one item of <%%= $res_name %%></h1><br />
+    <h1>Edit one item of <%%= $resource->{name} %%></h1><br />
     
-    <%= form_for '<%%= $res_name %%>_update', {id => $id}, method => 'post' => begin %>
+    <%= form_for '<%%= $resource->{name} %%>_update', {id => $id}, method => 'post' => begin %>
       %% foreach my $field (@$form_fields) {
       %% if ($field->{type} eq 'string' || $field->{type} eq 'int') {
         <%%= $field->{name} %%>:<br />
-        <%= text_field '<%%= $field->{name} %%>', value => $item->{<%%= $field->{name} %%>} %><br /><br />
+        <%= text_field '<%%= $field->{name} %%>', value => <%%= $item_accessor->($field->{name}) %%> %><br /><br />
       %% }
       %% elsif ($field->{type} eq 'text') {
         <%%= $field->{name} %%>:<br />
-        <%= text_area <%%= $field->{name} %%> => begin %><%=$item->{<%%= $field->{name} %%>}%><% end %><br /><br />
+        <%= text_area <%%= $field->{name} %%> => begin %><%= <%%= $item_accessor->($field->{name}) %%> %><% end %><br /><br />
       %% }
       %% }
         <%= hidden_field '_method' => 'put' %><br />
@@ -173,8 +172,8 @@ __DATA__
     <% end %>
     
     <br />
-    <%= link_to 'Index' => '<%%= $res_name %%>_index' %>
-    <%= link_to 'New'   => '<%%= $res_name %%>_create_form' %>
+    <%= link_to 'Index' => '<%%= $resource->{name} %%>_index' %>
+    <%= link_to 'New'   => '<%%= $resource->{name} %%>_new_form' %>
 
 
 %%############################################################################

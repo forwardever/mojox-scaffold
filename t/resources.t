@@ -37,13 +37,13 @@ $t->get_ok('/users/123')
 $t->get_ok('/users/123/edit')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: users_update_form");
+  ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: users_edit_form");
 
 
 $t->get_ok('/users/new')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a form that allows to create a new resource item! Route name: users_create_form");
+  ->content_is("Template for displaying a form that allows to create a new resource item! Route name: users_new_form");
 
 
 $t->post_ok('/users')
@@ -82,13 +82,13 @@ $t->get_ok('/admin/users/123')
 $t->get_ok('/admin/users/123/edit')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: admin-users_update_form");
+  ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: admin-users_edit_form");
 
 
 $t->get_ok('/admin/users/new')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
-  ->content_is("Template for displaying a form that allows to create a new resource item! Route name: admin-users_create_form");
+  ->content_is("Template for displaying a form that allows to create a new resource item! Route name: admin-users_new_form");
 
 
 $t->post_ok('/admin/users')

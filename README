@@ -1,13 +1,7 @@
-WARNING: the ResourcefulRoutes plugin is experimental. The API might
-change in the future. Looking at the ResourcefulRoutes plugin source code
-can give you a deeper understanding of how plugins and helpers work in
-Mojolicious and it also provides you with a suggestion how to create a bunch
-of RESTful routes with a single command.
-
 NOTE: use the latest Github version of mojolicious, as code is changing quickly!
 
 
-ResourcefulRoutes Summary
+MojoX Scaffold Summary
 ---------------------------
 
 In many cases, you have to create the same template and route structures and controller methods again and again.
@@ -17,15 +11,15 @@ For example, in order to manage a list of users, you need routes, controller met
     - to display information on a single user and
     - to create, update and delete users.
 
-ResourcefulRoutes helps you to set up a controller, template files and routes with a few commands.
+MojoX Scaffold helps you to set up a controller, template files and routes with a few commands.
 
 
-ResourcefulRoutes in action
+MojoX Scaffold in action
 ---------------------------
 
-1.) Install ResourcefulRoutes, using cpanminus, this is just
+1.) Install MojoX Scaffold, using cpanminus, this is just
 
-    cpanm http://github.com/forwardever/mojolicious-plugin-resourceful_routes/tarball/master
+    cpanm https://github.com/forwardever/mojox-scaffold
 
 2.) Create a Mojolicious app:
 
@@ -49,39 +43,41 @@ we add
 
 to the beginning of the startup method in the routes file.
 
+Also remove the existing sample routes!
 
 5.) Create a resource named "users"
 
 Make sure that you are still in the Test folder (NOT the lib folder).
 
-    perl script/test generate scaffold users first_name:string last_name:string description:text
+    perl script/test generate scaffold
 
+Enter the required information step by step.
 
-The following files have been created by ResourcefulRoutes (using standard mojolicious config):
+At the end, some manual corrections are required.
 
-    /test/lib/Test/Controllers/Users.pm  # Controller file
-    /test/templates/layouts/resourceful_layout.html.ep
-    /test/templates/users
-    /test/templates/users/index.html.ep
-    /test/templates/users/show.html.ep
-    /test/templates/users/create_form.html.ep
-    /test/templates/users/update_form.html.ep
+Add to your startup method (in case you used dbi):
 
-6.) Create a resource in the routes file located at "/test/lib/Test.pm"
-by adding to the startup method:
-
+    ### Plugins
     $self->plugin('resourceful_routes');
+    $self->plugin('model_instance', namespace => 'Test::DBI', method => 'dbh');
+
+    ### Resources
     $self->resources('users');
 
-Also remove the existing routes!
+Make sure that you put the correct config data in the database BASE file:
+    lib/Test/DBI.pm
+
+and also add a table to your database (there will be an sql command generated
+for this which works fine on mysql, but might have to be modified on other db systems)
+
 
 $self->resources('users') automatically generates the following routes
 on each start of your app:
 
         # GET /users/new - form to create a user
         $r->route('/users/new')->via('get')
-          ->to(controller => 'users', action => 'create_form')
-          ->name('users_create_form');
+          ->to(controller => 'users', action => 'new_form')
+          ->name('users_new_form');
 
         # GET /users/123 - show user with id 123
         $r->route('/users/:id')->via('get')
@@ -89,8 +85,8 @@ on each start of your app:
 
         # GET /users/123/edit - form to update a user
         $r->route('/users/:id/edit')->via('get')
-          ->to(controller => 'users', action => 'update_form')
-          ->name('users_update_form');
+          ->to(controller => 'users', action => 'edit_form')
+          ->name('users_edit_form');
 
         # GET /users - list of all users
         $r->route('/users')->via('get')
@@ -117,16 +113,13 @@ on each start of your app:
 
     perl script/test daemon --reload
 
-8.) Enter one of the following URLs to see the result:
+    Also start your database (e.g. mysql).
+
+8.) Enter the following URL to see the result:
 
     http://localhost:3000/users
-    http://localhost:3000/users/123
-    http://localhost:3000/users/123/edit
-    http://localhost:3000/users/new
 
-9.) Add database access, change template, configure everything as you need it
-
-10.) Note: as PUT and DELETE methods are not supported by old HTML standard, you
+9.) Note: as PUT and DELETE methods are not supported by old HTML standard, you
 have to add a hidden parameter in your update and delete forms:
 <input type="hidden" name="_method" value="put" />
 <input type="hidden" name="_method" value="delete" />
