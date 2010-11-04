@@ -248,6 +248,11 @@ my $attr = {
     RaiseError => 1,
 };
 
+# UTF 8
+if ($db_system eq 'mysql'){
+    $attr->{mysql_enable_utf8} = 1
+}
+
 
 sub new {
     my $dbh = DBI->connect("dbi:$db_system:$db_name:", $db_user, $db_pass, $attr)
