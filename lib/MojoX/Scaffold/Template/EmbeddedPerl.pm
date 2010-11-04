@@ -135,12 +135,14 @@ __DATA__
     <%= form_for '<%%= $resource->{name} %%>_create', method => 'post' => begin %>
       %% foreach my $field (@$form_fields) {
       %% if ($field->{type} eq 'string' || $field->{type} eq 'int') {
-        <%%= $field->{name} %%>:<br />
-        <%= text_field '<%%= $field->{name} %%>', value => '' %><br /><br />
+        <label for="<%%= $field->{name} %%>"><%%= $field->{name} %%></label>:<br />
+        <%= text_field '<%%= $field->{name} %%>', id => "<%%= $field->{name} %%>", value => '' %><br /><br />
+        
       %% }
       %% elsif ($field->{type} eq 'text') {
-        <%%= $field->{name} %%>:<br />
-        <%= text_area <%%= $field->{name} %%> => begin %><% end %><br /><br />
+        <label for="<%%= $field->{name} %%>"><%%= $field->{name} %%></label>:<br />
+        <%= text_area "<%%= $field->{name} %%>", id => "<%%= $field->{name} %%>" => begin %><% end %><br /><br />
+        
       %% }
       %% }
         <%= submit_button 'Create' %>
@@ -164,12 +166,14 @@ __DATA__
     <%= form_for '<%%= $resource->{name} %%>_update', {id => $id}, method => 'post' => begin %>
       %% foreach my $field (@$form_fields) {
       %% if ($field->{type} eq 'string' || $field->{type} eq 'int') {
-        <%%= $field->{name} %%>:<br />
-        <%= text_field '<%%= $field->{name} %%>', value => <%%= $item_accessor->($field->{name}) %%> %><br /><br />
+        <label for="<%%= $field->{name} %%>"><%%= $field->{name} %%></label>:<br />
+        <%= text_field '<%%= $field->{name} %%>', id => "<%%= $field->{name} %%>", value => <%%= $item_accessor->($field->{name}) %%> %><br /><br />
+        
       %% }
       %% elsif ($field->{type} eq 'text') {
-        <%%= $field->{name} %%>:<br />
-        <%= text_area <%%= $field->{name} %%> => begin %><%= <%%= $item_accessor->($field->{name}) %%> %><% end %><br /><br />
+        <label for="<%%= $field->{name} %%>"><%%= $field->{name} %%></label>:<br />
+        <%= text_area "<%%= $field->{name} %%>", id => "<%%= $field->{name} %%>" => begin %><%= <%%= $item_accessor->($field->{name}) %%> %><% end %><br /><br />
+        
       %% }
       %% }
         <%= hidden_field '_method' => 'put' %><br />
