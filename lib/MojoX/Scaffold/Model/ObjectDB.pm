@@ -38,6 +38,12 @@ sub edit_form {
     return $self->render_data('edit_form',$self->resource);
 }
 
+sub delete_form {
+    my $self = shift;
+    $self->change_tags;
+    return $self->render_data('edit_form',$self->resource);
+}
+
 sub create {
     my $self = shift;
     $self->change_tags;
@@ -151,6 +157,11 @@ __DATA__
     $self->stash(<%%= $resource->{model}->{item_name} %%> => $<%%= $resource->{model}->{item_name} %%>);
 
 %%############################################################################
+@@ delete_form
+%% my $resource = shift;
+    my $self = shift;
+
+%%############################################################################
 @@ create
 %% my $resource = shift;
 %% my $form_fields_list = join (',', map { '"'.$_.'"' } @{$resource->{form_field_names}});
@@ -189,7 +200,13 @@ __DATA__
 @@ delete
 %% my $resource = shift;
     my $self = shift;
-    # TO DO
+
+    my $id = $self->stash('id');
+
+    my $<%%= $resource->{model}->{item_name} %%> = $self->objectdb('<%%= $resource->{model}->{class_last} %%>')->delete(where => [id => $id]);
+
+    $self->flash(message => 'Your data has been deleted successfully!');
+
 
 %%############################################################################
 @@ source

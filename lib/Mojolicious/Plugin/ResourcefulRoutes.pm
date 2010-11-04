@@ -126,6 +126,11 @@ sub generate_routes {
         $r->route("/$path/:id")->via('get')
           ->to(controller => $ctrl, action => "show")->name($name . "_show");
 
+        # GET /articles/123/delete - form to confirm delete
+        $r->route("/$path/:id/delete")->via('get')
+          ->to(controller => $ctrl, action => "delete_form")
+          ->name($name . "_delete_form");
+
         # GET /articles/123/edit - form for update an article
         $r->route("/$path/:id/edit")->via('get')
           ->to(controller => $ctrl, action => "edit_form")

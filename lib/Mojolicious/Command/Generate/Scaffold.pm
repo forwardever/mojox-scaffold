@@ -84,6 +84,7 @@ sub run {
         $self->render_to_rel_file('show',        $tmpl_path.'/show.html.ep', $resource);
         $self->render_to_rel_file('new_form',    $tmpl_path.'/new_form.html.ep', $resource);
         $self->render_to_rel_file('edit_form',   $tmpl_path.'/edit_form.html.ep', $resource);
+        $self->render_to_rel_file('delete_form', $tmpl_path.'/delete_form.html.ep', $resource);
     }
 
 
@@ -716,6 +717,7 @@ sub create_model {
     $code->{show}             = $scaff->show;
     $code->{new_form}         = $scaff->new_form;
     $code->{edit_form}        = $scaff->edit_form;
+    $code->{delete_form}      = $scaff->delete_form;
     $code->{create}           = $scaff->create;
     $code->{update}           = $scaff->update;
     $code->{delete}           = $scaff->delete;
@@ -751,6 +753,7 @@ sub create_templates {
     $code->{show}        = $scaff->show;
     $code->{new_form}    = $scaff->new_form;
     $code->{edit_form}   = $scaff->edit_form;
+    $code->{delete_form} = $scaff->delete_form;
     $code->{layout}      = $scaff->layout;
 
 }
@@ -783,6 +786,11 @@ __DATA__
 @@ edit_form
 %% my $resource = shift;
 <%%= $resource->{tmpl}->{code}->{edit_form} %%>
+
+%%############################################################################
+@@ delete_form
+%% my $resource = shift;
+<%%= $resource->{tmpl}->{code}->{delete_form} %%>
 
 
 %%############################################################################
@@ -831,7 +839,6 @@ sub create {
 
     # and redirect to "show" in order to display the created resource
     $self->redirect_to('<%%= $resource->{name} %%>_show', id => $id );
-
 }
 
 
@@ -839,12 +846,15 @@ sub update {
 <%%= $resource->{model}->{code}->{update} %%>
     # redirect to "show" in order to display the updated resource
     $self->redirect_to('<%%= $resource->{name} %%>_show', id => $id );
-
 }
 
+sub delete_form {
+<%%= $resource->{model}->{code}->{delete_form} %%>
+}
 
 sub delete {
 <%%= $resource->{model}->{code}->{delete} %%>
+    $self->redirect_to('<%%= $resource->{name} %%>_index' );
 }
 
 1;

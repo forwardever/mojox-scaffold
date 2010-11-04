@@ -33,6 +33,12 @@ sub edit_form {
     return $self->render_data('edit_form', $self->resource);
 }
 
+sub delete_form {
+    my $self = shift;
+    $self->change_tags;
+    return $self->render_data('delete_form', $self->resource);
+}
+
 sub layout {
     my $self = shift;
     $self->change_tags;
@@ -56,6 +62,10 @@ __DATA__
     % layout 'resources', title => 'Index';
     <h1>List <%%= $resource->{name} %%></h1><br />
 
+    % if (my $message = flash 'message' ) {
+        <div class="flash"><%= $message %></div><br />
+    % }
+
     <table>
       <tr>
         %% foreach my $form_field (@$form_fields) {
@@ -63,6 +73,7 @@ __DATA__
         %% }
         <th>Edit</th>
         <th>View</th>
+        <th>Delete</th>
       </tr>
       % <%%= $resource->{model}->{code}->{loop} %%>
       <tr>
@@ -75,11 +86,14 @@ __DATA__
         <td>
           <%= link_to 'View' => '<%%= $resource->{name} %%>_show', { id => <%%= $item_accessor->('id') %%> } %>
         </td>
+        <td>
+          <%= link_to 'Delete' => '<%%= $resource->{name} %%>_delete_form', { id => <%%= $item_accessor->('id') %%> } %>
+        </td>
       </tr>
       % }
       % unless ( <%%= $resource->{model}->{code}->{number_of_rows} %%> ) {
       <tr>
-        <td colspan="<%%= @$form_fields+2 %%>">No Results</td>
+        <td colspan="<%%= @$form_fields+3 %%>">No Results</td>
       </tr>
       % }
     </table>
@@ -178,6 +192,24 @@ __DATA__
       %% }
         <%= hidden_field '_method' => 'put' %><br />
         <%= submit_button 'Update' %>
+    <% end %>
+    
+    <br />
+    <%= link_to 'Index' => '<%%= $resource->{name} %%>_index' %>
+    <%= link_to 'New'   => '<%%= $resource->{name} %%>_new_form' %>
+
+
+%%############################################################################
+@@ delete_form
+%% my $resource      = shift;
+    % layout 'resources', title => 'Update Form';
+    
+    <h1>Delete one item of <%%= $resource->{name} %%></h1><br />
+    
+    do you really want to delete this entry?
+    <%= form_for '<%%= $resource->{name} %%>_delete', {id => $id}, method => 'post' => begin %>
+        <%= hidden_field '_method' => 'delete' %><br />
+        <%= submit_button 'Delete' %>
     <% end %>
     
     <br />

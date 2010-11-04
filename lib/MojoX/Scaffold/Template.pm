@@ -21,6 +21,10 @@ sub edit_form {
     die 'no update_form method defined';
 }
 
+sub delete_form {
+    die 'no delete_form method defined';
+}
+
 sub layout {
     die 'no layout method defined';
 }
