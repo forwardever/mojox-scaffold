@@ -828,6 +828,7 @@ sub edit_form {
 
 sub create {
 <%%= $resource->{model}->{code}->{create} %%>
+
     # and redirect to "show" in order to display the created resource
     $self->redirect_to('<%%= $resource->{name} %%>_show', id => $id );
 

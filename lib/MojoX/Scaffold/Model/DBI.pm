@@ -178,8 +178,10 @@ __DATA__
     my $dbh = $self->dbh('<%%= $resource->{model}->{class_last} %%>');
     my $sth = $dbh->prepare(qq|insert into <%%= $resource->{model}->{items_name} %%> ($columns) values (<%%= $placeholders %%>)|);
     $sth->execute(@values);
-
+    
     my $id = $dbh->last_insert_id(undef,undef,undef,undef);
+
+    $self->flash(message => 'Your data has been saved successfully!');
 
 %%############################################################################
 @@ update
@@ -203,6 +205,8 @@ __DATA__
 
     my $sth = $self->dbh('<%%= $resource->{model}->{class_last} %%>')->prepare(qq|update <%%= $resource->{model}->{items_name} %%> set $columns where id = ?|);
     $sth->execute(@values, $id);
+
+	$self->flash(message => 'Your data has been updated successfully!');
 
 %%############################################################################
 @@ delete
@@ -239,8 +243,14 @@ my $db_name   = ''; ## mysql: name of database, sqlite: name of file
 my $db_user   = '';
 my $db_pass   = '';
 
+my $attr = {
+    PrintError => 0,
+    RaiseError => 1,
+};
+
+
 sub new {
-    my $dbh = DBI->connect("dbi:$db_system:$db_name:", $db_user, $db_pass)
+    my $dbh = DBI->connect("dbi:$db_system:$db_name:", $db_user, $db_pass, $attr)
       or die $DBI::errstr;
     return $dbh;
 }

@@ -99,6 +99,11 @@ __DATA__
     % layout 'resources', title => 'Show';
     <h1>Show one item of <%%= $resource->{name} %%></h1><br />
     
+    % if (my $message = flash 'message' ) {
+        <div class="flash"><%= $message %></div><br />
+    % }
+
+    
     <table>
         %% foreach my $form_field (@$form_fields) {
         <tr>
@@ -189,6 +194,11 @@ __DATA__
         body, p, th, td {
           font-family: arial, verdana, helvetica, sans-serif;
           font-size:   14px;
+        }
+        div.flash {
+          font-family: arial, verdana, helvetica, sans-serif;
+          font-size:   16px;
+          color: #C30;
         }
         table {
           border-collapse: collapse;
