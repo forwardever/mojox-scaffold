@@ -1,0 +1,1 @@
+Template for displaying a form that allows to create a new resource item! Route name: <%= $route_name =>
