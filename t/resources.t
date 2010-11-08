@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-plan tests => 59;
+plan tests => 67;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -38,6 +38,11 @@ $t->get_ok('/users/123/edit')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
   ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: users_edit_form");
+
+$t->get_ok('/users/123/delete')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("Template for displaying a form that allows to delete an existing resource item! Route name: users_delete_form");
 
 
 $t->get_ok('/users/new')
@@ -83,6 +88,11 @@ $t->get_ok('/admin/users/123/edit')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
   ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: admin-users_edit_form");
+
+$t->get_ok('/admin/users/123/delete')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("Template for displaying a form that allows to delete an existing resource item! Route name: admin-users_delete_form");
 
 
 $t->get_ok('/admin/users/new')

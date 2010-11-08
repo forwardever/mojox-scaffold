@@ -33,6 +33,12 @@ sub edit_form {
     $self->stash(route_name => $route_name);
 }
 
+sub delete_form {
+    my $self = shift;
+    my $route_name = $self->match->endpoint->name;
+    $self->stash(route_name => $route_name);
+}
+
 
 sub create {
     my $self = shift;
