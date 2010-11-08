@@ -83,76 +83,80 @@ sub generate_routes {
 
     # Singular resource, i.e. app knows id value (e.g. from login)
     if ($singular) {
+        
+        my $nr = $r->route("$path");
 
         # GET /article/new - form for create an article
-        $r->route("/$path/new")->via('get')
+        $nr->route("/new")->via('get')
           ->to(controller => $ctrl, action => "new_form")
           ->name($name . "_new_form");
 
         # GET /article - show article
-        $r->route("/$path")->via('get')
+        $nr->route("/")->via('get')
           ->to(controller => $ctrl, action => "show")->name($name . "_show");
 
         # GET /article/edit - form for update an article
-        $r->route("/$path/edit")->via('get')
+        $nr->route("/edit")->via('get')
           ->to(controller => $ctrl, action => "edit_form")
           ->name($name . "_edit_form");
 
         # POST /article - create article
-        $r->route("/$path")->via('post')
+        $nr->route("/")->via('post')
           ->to(controller => $ctrl, action => "create")
           ->name($name . '_create');
 
         # PUT /article - update article
-        $r->route("/$path")->via('put')
+        $nr->route("/")->via('put')
           ->to(controller => $ctrl, action => "update")
           ->name($name . '_update');
 
         # DELETE /article - delete article
-        $r->route("/$path")->via('delete')
+        $nr->route("/")->via('delete')
           ->to(controller => $ctrl, action => "delete")
           ->name($name . '_delete');
     }
 
     # Id passed via URL
     else {
+        
+        my $nr = $r->route("$path");
 
         # GET /articles/new - form for create an article
-        $r->route("/$path/new")->via('get')
+        $nr->route("/new")->via('get')
           ->to(controller => $ctrl, action => "new_form")
           ->name($name . "_new_form");
 
         # GET /articles/123 - show article with id 123
-        $r->route("/$path/:id")->via('get')
+        $nr->route("/:id")->via('get')
           ->to(controller => $ctrl, action => "show")->name($name . "_show");
 
         # GET /articles/123/delete - form to confirm delete
-        $r->route("/$path/:id/delete")->via('get')
+        $nr->route("/:id/delete")->via('get')
           ->to(controller => $ctrl, action => "delete_form")
           ->name($name . "_delete_form");
 
         # GET /articles/123/edit - form for update an article
-        $r->route("/$path/:id/edit")->via('get')
+        $nr->route("/:id/edit")->via('get')
           ->to(controller => $ctrl, action => "edit_form")
           ->name($name . "_edit_form");
 
         # GET /articles - list of all articles
-        $r->route("/$path")->via('get')
+        $nr->route("/")->via('get')
           ->to(controller => $ctrl, action => "index")
           ->name($name . '_index');
 
         # POST /articles - create new article
-        $r->route("/$path")->via('post')
+        $nr->route("/")->via('post')
           ->to(controller => $ctrl, action => "create")
           ->name($name . '_create');
 
         # PUT /articles/123 - update article
-        $r->route("/$path/:id")->via('put')
+        $nr->route("/:id")->via('put')
           ->to(controller => $ctrl, action => "update")
           ->name($name . '_update');
 
         # DELETE /articles/123 - delete article
-        $r->route("/$path/:id")->via('delete')
+        $nr->route("/:id")->via('delete')
           ->to(controller => $ctrl, action => "delete")
           ->name($name . '_delete');
     }

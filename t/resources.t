@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-plan tests => 83;
+plan tests => 89;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -38,6 +38,11 @@ $t->get_ok('/users/123/edit')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
   ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: users_edit_form");
+
+$t->get_ok('/users/123/othermethod')
+  ->status_is(404)
+  ->header_is(Server => 'Mojolicious (Perl)');
+
 
 $t->get_ok('/users/123/delete')
   ->status_is(200)
@@ -100,6 +105,12 @@ $t->get_ok('/admin/users/123/edit')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
   ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: admin-users_edit_form");
+
+
+$t->get_ok('/admin/users/123/othermethod')
+  ->status_is(404)
+  ->header_is(Server => 'Mojolicious (Perl)');
+
 
 $t->get_ok('/admin/users/123/delete')
   ->status_is(200)
