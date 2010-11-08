@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-plan tests => 89;
+plan tests => 125;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -153,6 +153,63 @@ $t->post_form_ok('/admin/users/123' => {_method => 'delete'})
   ->header_is(Server => 'Mojolicious (Perl)')
   ->content_is("DELETE request, delete method executed! Route name: admin-users_delete");
 
+
+
+
+# /member (singular resource)
+
+$t->get_ok('/member/new')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("Template for displaying a form that allows to create a new resource item! Route name: member_new_form");
+
+
+$t->get_ok('/member')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("Template for displaying a single resource item! Route name: member_show");
+
+
+$t->get_ok('/member/edit')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("Template for displaying a form that allows to edit an existing resource item! Route name: member_edit_form");
+
+
+$t->get_ok('/member/delete')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("Template for displaying a form that allows to delete an existing resource item! Route name: member_delete_form");
+
+
+$t->post_ok('/member')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("POST request, create method executed! Route name: member_create");
+
+
+$t->put_ok('/member')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("PUT request, update method executed! Route name: member_update");
+
+
+$t->post_form_ok('/member' => {_method => 'put'})
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("PUT request, update method executed! Route name: member_update");
+
+
+$t->delete_ok('/member')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("DELETE request, delete method executed! Route name: member_delete");
+
+
+$t->post_form_ok('/member' => {_method => 'delete'})
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("DELETE request, delete method executed! Route name: member_delete");
 
 
 1;

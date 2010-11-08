@@ -10,7 +10,7 @@ sub startup {
     my $self = shift;
 
     $self->plugin('resourceful_routes');
-    $self->resources('users','admin-users');
+    $self->resources('users', 'admin-users', 'member' => {singular => 1});
 
 }
 

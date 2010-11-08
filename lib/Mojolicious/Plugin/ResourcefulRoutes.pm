@@ -100,6 +100,11 @@ sub generate_routes {
           ->to(controller => $ctrl, action => 'edit_form')
           ->name($name . '_edit_form');
 
+        # GET /article/delete - form to confirm delete
+        $nr->route('/delete')->via('get')
+          ->to(controller => $ctrl, action => 'delete_form')
+          ->name($name . '_delete_form');
+
         # POST /article - create article
         $nr->route('/')->via('post')
           ->to(controller => $ctrl, action => 'create')
@@ -114,6 +119,7 @@ sub generate_routes {
         $nr->route('/')->via('delete')
           ->to(controller => $ctrl, action => 'delete')
           ->name($name . '_delete');
+        
     }
 
     # Id passed via URL
