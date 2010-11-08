@@ -87,32 +87,32 @@ sub generate_routes {
         my $nr = $r->route("$path");
 
         # GET /article/new - form for create an article
-        $nr->route("/new")->via('get')
-          ->to(controller => $ctrl, action => "new_form")
-          ->name($name . "_new_form");
+        $nr->route('/new')->via('get')
+          ->to(controller => $ctrl, action => 'new_form')
+          ->name($name . '_new_form');
 
         # GET /article - show article
-        $nr->route("/")->via('get')
-          ->to(controller => $ctrl, action => "show")->name($name . "_show");
+        $nr->route('/')->via('get')
+          ->to(controller => $ctrl, action => 'show')->name($name . '_show');
 
         # GET /article/edit - form for update an article
-        $nr->route("/edit")->via('get')
-          ->to(controller => $ctrl, action => "edit_form")
-          ->name($name . "_edit_form");
+        $nr->route('/edit')->via('get')
+          ->to(controller => $ctrl, action => 'edit_form')
+          ->name($name . '_edit_form');
 
         # POST /article - create article
-        $nr->route("/")->via('post')
-          ->to(controller => $ctrl, action => "create")
+        $nr->route('/')->via('post')
+          ->to(controller => $ctrl, action => 'create')
           ->name($name . '_create');
 
         # PUT /article - update article
-        $nr->route("/")->via('put')
-          ->to(controller => $ctrl, action => "update")
+        $nr->route('/')->via('put')
+          ->to(controller => $ctrl, action => 'update')
           ->name($name . '_update');
 
         # DELETE /article - delete article
-        $nr->route("/")->via('delete')
-          ->to(controller => $ctrl, action => "delete")
+        $nr->route('/')->via('delete')
+          ->to(controller => $ctrl, action => 'delete')
           ->name($name . '_delete');
     }
 
@@ -122,42 +122,42 @@ sub generate_routes {
         my $nr = $r->route("$path");
 
         # GET /articles/new - form for create an article
-        $nr->route("/new")->via('get')
-          ->to(controller => $ctrl, action => "new_form")
-          ->name($name . "_new_form");
+        $nr->route('/new')->via('get')
+          ->to(controller => $ctrl, action => 'new_form')
+          ->name($name . '_new_form');
 
         # GET /articles/123 - show article with id 123
-        $nr->route("/:id")->via('get')
-          ->to(controller => $ctrl, action => "show")->name($name . "_show");
+        $nr->route('/:id')->via('get')
+          ->to(controller => $ctrl, action => 'show')->name($name . '_show');
 
         # GET /articles/123/delete - form to confirm delete
-        $nr->route("/:id/delete")->via('get')
-          ->to(controller => $ctrl, action => "delete_form")
-          ->name($name . "_delete_form");
+        $nr->route('/:id/delete')->via('get')
+          ->to(controller => $ctrl, action => 'delete_form')
+          ->name($name . '_delete_form');
 
         # GET /articles/123/edit - form for update an article
-        $nr->route("/:id/edit")->via('get')
-          ->to(controller => $ctrl, action => "edit_form")
-          ->name($name . "_edit_form");
+        $nr->route('/:id/edit')->via('get')
+          ->to(controller => $ctrl, action => 'edit_form')
+          ->name($name . '_edit_form');
 
         # GET /articles - list of all articles
-        $nr->route("/")->via('get')
-          ->to(controller => $ctrl, action => "index")
+        $nr->route('/')->via('get')
+          ->to(controller => $ctrl, action => 'index')
           ->name($name . '_index');
 
         # POST /articles - create new article
-        $nr->route("/")->via('post')
-          ->to(controller => $ctrl, action => "create")
+        $nr->route('/')->via('post')
+          ->to(controller => $ctrl, action => 'create')
           ->name($name . '_create');
 
         # PUT /articles/123 - update article
-        $nr->route("/:id")->via('put')
-          ->to(controller => $ctrl, action => "update")
+        $nr->route('/:id')->via('put')
+          ->to(controller => $ctrl, action => 'update')
           ->name($name . '_update');
 
         # DELETE /articles/123 - delete article
-        $nr->route("/:id")->via('delete')
-          ->to(controller => $ctrl, action => "delete")
+        $nr->route('/:id')->via('delete')
+          ->to(controller => $ctrl, action => 'delete')
           ->name($name . '_delete');
     }
 }
