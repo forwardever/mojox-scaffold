@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-plan tests => 67;
+plan tests => 83;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -63,7 +63,19 @@ $t->put_ok('/users/123')
   ->content_is("PUT request, update method executed! Route name: users_update");
 
 
+$t->post_form_ok('/users/123' => {_method => 'put'})
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("PUT request, update method executed! Route name: users_update");
+
+
 $t->delete_ok('/users/123')
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("DELETE request, delete method executed! Route name: users_delete");
+
+
+$t->post_form_ok('/users/123' => {_method => 'delete'})
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
   ->content_is("DELETE request, delete method executed! Route name: users_delete");
@@ -113,10 +125,23 @@ $t->put_ok('/admin/users/123')
   ->content_is("PUT request, update method executed! Route name: admin-users_update");
 
 
+$t->post_form_ok('/admin/users/123' => {_method => 'put'})
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("PUT request, update method executed! Route name: admin-users_update");
+
+
 $t->delete_ok('/admin/users/123')
   ->status_is(200)
   ->header_is(Server => 'Mojolicious (Perl)')
   ->content_is("DELETE request, delete method executed! Route name: admin-users_delete");
+
+
+$t->post_form_ok('/admin/users/123' => {_method => 'delete'})
+  ->status_is(200)
+  ->header_is(Server => 'Mojolicious (Perl)')
+  ->content_is("DELETE request, delete method executed! Route name: admin-users_delete");
+
 
 
 1;
