@@ -1,4 +1,4 @@
-package Test;
+package Test3;
 
 use strict;
 use warnings;
@@ -10,7 +10,7 @@ sub startup {
     my $self = shift;
 
     $self->plugin('resourceful_routes');
-    $self->resources('users', 'admin-users', 'member' => -singular => 1);
+    $self->resources('users', -only => ['delete', 'delete_form']);
 
 }
 
