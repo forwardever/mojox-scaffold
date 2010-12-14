@@ -17,10 +17,11 @@ sub register {
             my $c = shift;
 
             if ($c->req->method eq 'POST') {
-                if (lc($c->req->param('_method')) eq 'delete') {
+                my $method = lc($c->req->param('_method') || '');
+                if ($method eq 'delete') {
                     $c->req->method('DELETE');
                 }
-                elsif (lc($c->req->param('_method')) eq 'put') {
+                elsif ($method eq 'put') {
                     $c->req->method('PUT');
                 }
             }
