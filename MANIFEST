@@ -10,4 +10,3 @@ lib/MojoX/Scaffold/Template.pm
 lib/MojoX/Scaffold/Model/DBI.pm
 lib/MojoX/Scaffold/Model/ObjectDB.pm
 lib/MojoX/Scaffold/Template/EmbeddedPerl.pm
-MYMETA.yml

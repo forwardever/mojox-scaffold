@@ -19,7 +19,7 @@ MojoX Scaffold in action
 
 1.) Install MojoX Scaffold, using cpanminus, this is just
 
-    cpanm https://github.com/forwardever/mojox-scaffold
+    cpanm https://github.com/forwardever/mojox-scaffold/tarball/master
 
 2.) Create a Mojolicious app:
 
