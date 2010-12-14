@@ -12,9 +12,9 @@ our $VERSION = '0.04';
 sub register {
     my ($self, $app) = @_;
 
-    $app->plugins->add_hook(
+    $app->hook(
         before_dispatch => sub {
-            my ($self, $c) = @_;
+            my $c = shift;
 
             if ($c->req->method eq 'POST') {
                 if (lc($c->req->param('_method')) eq 'delete') {
