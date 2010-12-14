@@ -23,7 +23,7 @@ MojoX Scaffold in action
 
 2.) Create a Mojolicious app:
 
-    mojolicious generate app Test
+    mojo generate app Test
 
 3.) Switch to the newly created Test app:
 
