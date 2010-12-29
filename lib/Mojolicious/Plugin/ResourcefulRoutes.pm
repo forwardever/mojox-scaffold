@@ -54,6 +54,8 @@ sub register {
                 '-singular' => 1
             );
 
+            my $last_route;
+
             # Options
             while (@params) {
                 my $options  = {};
@@ -78,9 +80,11 @@ sub register {
                     }
                 }
 
-                $self->generate_routes($c, $resource, $options);
+                $last_route = $self->generate_routes($c, $resource, $options);
 
             }
+
+            return $last_route;
 
         }
     );
@@ -144,10 +148,12 @@ sub generate_routes {
     my $r = $c->app->routes;
 
 
+    # Nested route
+    my $nr = $r->route("$path");
+
+
     # Singular resource, i.e. app knows id value (e.g. from login)
     if ($singular) {
-
-        my $nr = $r->route("$path");
 
         # GET /article/new - form for create an article
         $nr->route('/new')->via('get')
@@ -195,8 +201,6 @@ sub generate_routes {
     # Id passed via URL
     else {
 
-        my $nr = $r->route("$path");
-
         # GET /articles/new - form for create an article
         $nr->route('/new')->via('get')
           ->to(controller => $ctrl, action => 'new_form')
@@ -243,6 +247,9 @@ sub generate_routes {
           ->name($name . '_delete')
           if $valid{delete};
     }
+
+    return $nr;
+
 }
 
 1;

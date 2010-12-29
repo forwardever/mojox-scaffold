@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-plan tests => 167;
+plan tests => 175;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -19,6 +19,62 @@ use_ok 'Test::Users';
 use_ok 'Test::Admin::Users';
 
 
+
+### Test return values
+
+# one resource defined
+my $app = Test->new;
+my $nested = $app->resources('cars');
+
+# returns routes object
+is ref $nested, 'Mojolicious::Routes';
+
+# is nested routes object (parent of routes that dispatch to "Cars" controller)
+my $defaults = $nested->children->[0]->pattern->defaults;
+is $defaults->{controller}, 'cars';
+
+
+
+# same test with options
+$app = Test->new;
+$nested = $app->resources('cars', -only => ['index', 'show']);
+
+# returns routes object
+is ref $nested, 'Mojolicious::Routes';
+
+# is nested routes object (parent of routes that dispatch to "Cars" controller)
+$defaults = $nested->children->[0]->pattern->defaults;
+is $defaults->{controller}, 'cars';
+
+
+
+# now multiple resources defined, only last route returned
+$app = Test->new;
+$nested = $app->resources('cars', 'members');
+
+# returns routes object
+is ref $nested, 'Mojolicious::Routes';
+
+# is nested routes object (parent of routes that dispatch to "Members" controller)
+$defaults = $nested->children->[0]->pattern->defaults;
+is $defaults->{controller}, 'members';
+
+
+
+# same test with options
+$app = Test->new;
+$nested = $app->resources('cars', 'members', -only => ['index', 'show']);
+
+# returns routes object
+is ref $nested, 'Mojolicious::Routes';
+
+# is nested routes object (parent of routes that dispatch to "Members" controller)
+$defaults = $nested->children->[0]->pattern->defaults;
+is $defaults->{controller}, 'members';
+
+
+
+### Make real requests
 
 # /users/
 
