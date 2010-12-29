@@ -1,6 +1,15 @@
 NOTE: use the latest Github version of mojolicious, as code is changing quickly!
 
 
+ResourcefulRoutes
+---------------------------
+
+The ResourcefulRoutes plugin is part of MojoX Scaffold. For more information
+go to:
+
+https://github.com/forwardever/mojox-scaffold/blob/master/lib/Mojolicious/Plugin/ResourcefulRoutes.pm
+
+
 MojoX Scaffold Summary
 ---------------------------
 
