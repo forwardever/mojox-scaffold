@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-plan tests => 175;
+plan tests => 185;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -33,6 +33,9 @@ is ref $nested, 'Mojolicious::Routes';
 my $defaults = $nested->children->[0]->pattern->defaults;
 is $defaults->{controller}, 'cars';
 
+# is plural (8 routes)
+is @{$nested->children}, 8;
+
 
 
 # same test with options
@@ -45,6 +48,9 @@ is ref $nested, 'Mojolicious::Routes';
 # is nested routes object (parent of routes that dispatch to "Cars" controller)
 $defaults = $nested->children->[0]->pattern->defaults;
 is $defaults->{controller}, 'cars';
+
+# -only limits child route
+is @{$nested->children}, 2;
 
 
 
@@ -59,6 +65,9 @@ is ref $nested, 'Mojolicious::Routes';
 $defaults = $nested->children->[0]->pattern->defaults;
 is $defaults->{controller}, 'members';
 
+# is plural (8 routes)
+is @{$nested->children}, 8;
+
 
 
 # same test with options
@@ -71,6 +80,42 @@ is ref $nested, 'Mojolicious::Routes';
 # is nested routes object (parent of routes that dispatch to "Members" controller)
 $defaults = $nested->children->[0]->pattern->defaults;
 is $defaults->{controller}, 'members';
+
+# -only limits child routes
+is @{$nested->children}, 2;
+
+
+
+# similar test for singular route
+$app = Test->new;
+$nested = $app->resources('cars', 'member', -singular => 1);
+
+# returns routes object
+is ref $nested, 'Mojolicious::Routes';
+
+# is nested routes object (parent of routes that dispatch to "Members" controller)
+$defaults = $nested->children->[0]->pattern->defaults;
+is $defaults->{controller}, 'member';
+
+# is singular (7 child routes)
+is @{$nested->children}, 7;
+
+
+
+# same test with options, -only index is ignored
+$app = Test->new;
+$nested = $app->resources('cars', 'member', -singular => 1, -only => ['index', 'show']);
+
+# returns routes object
+is ref $nested, 'Mojolicious::Routes';
+
+# is nested routes object (parent of routes that dispatch to "Members" controller)
+$defaults = $nested->children->[0]->pattern->defaults;
+is $defaults->{controller}, 'member';
+
+# is singular (7 child routes)
+is @{$nested->children}, 1;
+
 
 
 
