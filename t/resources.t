@@ -49,7 +49,7 @@ is ref $nested, 'Mojolicious::Routes';
 $defaults = $nested->children->[0]->pattern->defaults;
 is $defaults->{controller}, 'cars';
 
-# -only limits child route
+# -only limits child routes
 is @{$nested->children}, 2;
 
 
@@ -102,7 +102,7 @@ is @{$nested->children}, 7;
 
 
 
-# same test with options, -only index is ignored
+# same test with options
 $app = Test->new;
 $nested = $app->resources('cars', 'member', -singular => 1, -only => ['index', 'show']);
 
@@ -113,7 +113,7 @@ is ref $nested, 'Mojolicious::Routes';
 $defaults = $nested->children->[0]->pattern->defaults;
 is $defaults->{controller}, 'member';
 
-# is singular (7 child routes)
+# -only limits child routes (index is ignored)
 is @{$nested->children}, 1;
 
 
