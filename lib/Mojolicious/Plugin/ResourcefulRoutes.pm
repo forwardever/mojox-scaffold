@@ -246,3 +246,181 @@ sub generate_routes {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Mojolicious::Plugin::ResourcefulRoutes
+
+=head1 SYNOPSIS
+
+    sub startup {
+        my $self = shift;
+
+        # Create "cities" and "admin-cities" resources
+        $self->plugin('resourceful_routes');
+        $self->resources('cities', -except => ['delete', 'delete_form'] , 'admin-cities' );
+   
+    }
+
+=head1 DESCRIPTION
+
+L<Mojolicious::Plugin::ResourcefulRoutes> allows you to define a bunch of
+routes with a single command.
+
+For example, in order to manage a list of cities, you need routes to
+    - list all cities,
+    - display information on a single city,
+    - display forms to create, update and delete cities
+    - and to finally create, update and delete cities.
+
+Routes are created based on naming conventions. Depending on the HTTP request
+method and the request path, users are dispatched to a specific controller
+method. In addition to that, each route gets a name.
+
+$self->resources('cities') automatically generates the following
+routes on each start of your app.
+
+    HTTP     URL (not including      Contoller   Method          Route Name
+    request  http://localhost:3000)
+    method          
+
+    GET      /cities/new             Cities      new_form        cities_new_form
+    GET      /cities/paris           Cities      show            cities_show
+    GET      /cities/paris/edit      Cities      edit_form       cities_edit_form
+    GET      /cities/paris/delete    Cities      delete_form     cities_delete_form
+    GET      /cities                 Cities      index           cities_index
+    POST     /cities                 Cities      create          cities_create
+    PUT      /cities                 Cities      update          cities_update
+    DELETE   /cities                 Cities      delete          cities_delete
+
+
+or written as code:
+
+
+        # GET /cities/new - form to create a user
+        $r->route('/cities/new')->via('get')
+          ->to(controller => 'cities', action => 'new_form')
+          ->name('cities_new_form');
+
+        # GET /cities/123 - show user with id 123
+        $r->route('/cities/:id')->via('get')
+          ->to(controller => 'cities', action => 'show')->name('cities_show');
+
+        # GET /cities/123/edit - form to update a user
+        $r->route('/cities/:id/edit')->via('get')
+          ->to(controller => 'cities', action => 'edit_form')
+          ->name('cities_edit_form');
+
+        # GET /cities - list of all cities
+        $r->route('/cities')->via('get')
+          ->to(controller => 'cities', action => 'index')
+          ->name('cities_index');
+
+        # POST /cities - create new user
+        $r->route('/cities')->via('post')
+          ->to(controller => 'cities', action => 'create')
+          ->name('cities_create');
+
+        # PUT /cities/123 - update an existing user
+        $r->route('/cities/:id')->via('put')
+          ->to(controller => 'cities', action => 'update')
+          ->name('cities_update');
+
+        # GET /cities/123/delete - form to confirm delete
+        $r->route('/cities/:id/delete')->via('get')
+          ->to(controller => 'cities', action => 'delete_form')
+          ->name('cities_delete_form');
+
+        # DELETE /cities/123 - delete an existing user
+        $r->route('/cities/:id')->via('delete')
+          ->to(controller => 'cities', action => 'delete')
+          ->name('cities_delete');
+
+Actually, L<Mojolicious::Plugin::ResourcefulRoutes> makes use of nested routes
+(the code above defines seperate routes for demonstration purposes).
+
+Sometimes, you don't want to give users access to all, but only selected
+controller methods.
+
+To allow users to just display information on a single city and to list all
+cities, you can use the "only" option:
+
+    $self->resources('cities', -only => ['show', 'index'])
+
+To allow users to view, create and update cities, but not to delete a city, you
+can use the "except" option:
+
+    $self->resources('cities', -except => ['delete', 'delete_form'])
+
+
+To dispatch to a more complex controller structure, you can use hyphens, e.g.
+$self->resources('admin-cities') creates the following routes:
+
+    HTTP     URL (not including            Contoller         Method          Route Name
+    request  http://localhost:3000)
+    method          
+
+    GET      /admin/cities/new             Admin/Cities      new_form        admin-cities_new_form
+    GET      /admin/cities/paris           Admin/Cities      show            admin-cities_show
+    GET      /admin/cities/paris/edit      Admin/Cities      edit_form       admin-cities_edit_form
+    GET      /admin/cities/paris/delete    Admin/Cities      delete_form     admin-cities_delete_form
+    GET      /admin/cities                 Admin/Cities      index           admin-cities_index
+    POST     /admin/cities                 Admin/Cities      create          admin-cities_create
+    PUT      /admin/cities                 Admin/Cities      update          admin-cities_update
+    DELETE   /admin/cities                 Admin/Cities      delete          admin-cities_delete
+
+
+Sometimes, it makes sense to just define singular resources. For example, if
+each user is responsible for managing the data of exactly one city, the user
+data could be derived from a session cookie and the name of the city would than
+be read from a database using the username. In that case, the name of the city
+doesn't has to be part of the URL.
+
+Use $self->resources('city', -singular => 1) in order to generate the following
+routes:
+
+    HTTP     URL (not including      Contoller   Method          Route Name
+    request  http://localhost:3000)
+    method          
+
+    GET      /city/new               City         new_form        city_new_form
+    GET      /city                   City         show            city_show
+    GET      /city/edit              City         edit_form       city_edit_form
+    GET      /city/delete            City         delete_form     city_delete_form
+    POST     /city                   City         create          city_create
+    PUT      /city                   City         update          city_update
+    DELETE   /city                   City         delete          city_delete
+
+
+=head1 METHODS
+
+L<Mojolicious::Plugin::ResourcefulRoutes> inherits all methods from
+L<Mojolicious::Plugin> and implements the following new ones.
+
+=head2 C<resources>
+
+    $self->resources('foo', 'bar', 'baz');
+
+Add resources.
+
+=head1 AUTHOR
+
+ForwardEver
+
+=head1 COPYRIGHT
+
+Copyright (C) 2010, ForwardEver.
+
+This program is free software, you can redistribute it and/or modify it under
+the same terms as Perl 5.10.
+
+=head1 SEE ALSO
+
+L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojolicio.us>.
+
+=cut
+
+
+
+1;
