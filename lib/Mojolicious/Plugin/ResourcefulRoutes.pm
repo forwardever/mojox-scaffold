@@ -270,10 +270,61 @@ Mojolicious::Plugin::ResourcefulRoutes
    
     }
 
-=head1 DESCRIPTION
 
-L<Mojolicious::Plugin::ResourcefulRoutes> allows you to define a bunch of
-routes with a single command.
+=head1 THE ADVANTAGE OF ROUTES
+
+Instead of letting a web server like Apache decide which files to serve based on
+the provided URL, the whole work can be done by a Mojolicious application.
+
+For example, a URL like
+
+    http://www.example.com/cities/paris.html
+
+can provide content that has been retrieved from a database, or also content
+that has been fetched from another website in "real-time", or even continuously
+updating content retrieved from other users sitting in front of their computers.
+
+So, Mojolicious allows you to display dynamic content in a search engine
+friendly way!
+
+In order to achieve this, Mojolicious decides on it's own how to handle URLs and
+what to deliver as a result.
+
+This is where routes come into play. Routes are kind of "rules" how to handle
+URLs. Mojolicious checks whether a specific URL matches a certain pattern (as
+defined in the route), and determines what happens if a match occurs (as also
+defined in the route).
+
+For example, you can configure Apache to handle all URLs, except requests for
+http://yourdomain.com/myapp, so that URLs like
+
+    http://yourdomain.com/myapp/users.html
+    http://yourdomain.com/myapp/data.html
+
+are handled by Mojolicious.
+
+Routes themselves are very dynamic (think of them as kind of simplified regular
+expressions), so another advantage of routes is that an infinite amount of URLs
+can be handled, without the need to place a file for each URL on your server .
+
+For example, the following route (using a placeholder)
+
+    /:cities/
+
+would be responsible to deliver content for the following URLs:
+
+    http://yourdomain.com/myapp/new_york.html
+    http://yourdomain.com/myapp/paris.html or
+    http://yourdomain.com/myapp/any_other_city.html
+
+Finally, routes are reversible. Instead of hard copying URLs in your templates,
+you can use route names in templates, forms and redirects. If you decide to
+relocate the content (provide content under a different URL), you just need to
+modifiy the route, not the templates, forms etc.
+
+Creating routes is not that difficult, but requires a lot of typing. In addition
+to that, the route structures for many tasks are very similar, they just have
+to provide some kind of CRUD (create, read, update, delete) functionality.
 
 For example, in order to manage a list of cities, you need routes to
     - list all cities,
@@ -281,9 +332,24 @@ For example, in order to manage a list of cities, you need routes to
     - display forms to create, update and delete cities
     - and to finally create, update and delete cities.
 
-Routes are created based on naming conventions. Depending on the HTTP request
-method and the request path, users are dispatched to a specific controller
-method. In addition to that, each route gets a name.
+In order to manage a list of users, you need very similar routes. Why
+reinventing the wheel again and again if route structures are very
+similar in many cases.
+
+This is where L<Mojolicious::Plugin::ResourcefulRoutes> comes into play. It
+allows you to define a bunch of routes with a single command.
+
+
+=head1 DESCRIPTION
+
+While there are many ways to make use of routes, one frequent use case is to
+dispatch user requests to a specific controller method based on the HTTP request
+method (GET, POST, PUT, DELETE) and the request path (e.g. /cities/new).
+
+These controller methods than allow the user to create, read, update and delete
+data stored in a database. L<Mojolicious::Plugin::ResourcefulRoutes> automates
+the process of routes creation for CRUD functionality (it does not provide the
+CRUD functionality itself, just the routes!).
 
 $self->resources('cities') automatically generates the following
 routes on each start of your app.
@@ -293,16 +359,28 @@ routes on each start of your app.
     method          
 
     GET      /cities/new             Cities      new_form        cities_new_form
-    GET      /cities/paris           Cities      show            cities_show
-    GET      /cities/paris/edit      Cities      edit_form       cities_edit_form
-    GET      /cities/paris/delete    Cities      delete_form     cities_delete_form
+    GET      /cities/:id             Cities      show            cities_show
+    GET      /cities/:id/edit        Cities      edit_form       cities_edit_form
+    GET      /cities/:id/delete      Cities      delete_form     cities_delete_form
     GET      /cities                 Cities      index           cities_index
     POST     /cities                 Cities      create          cities_create
     PUT      /cities                 Cities      update          cities_update
     DELETE   /cities                 Cities      delete          cities_delete
 
+For example, if a user requests "/cities/paris/edit" via "GET", the "edit_form"
+method of the "Cities" controller is called. It's up to you what to put into
+this controller method, but usually it would be responsible to display
+a HTML form allowing you to edit a single city (in this case "paris").
 
-or written as code:
+As the routes generated by $self->resources('cities') make use of a placeholder
+(:id), the actual name of the city is saved in the so called stash. As a result,
+the name of the city can easily be accessed in the controller method:
+
+    my $name = $self->stash('id') # $self is a controller object
+
+The code generated in the background looks more like this (however, 
+L<Mojolicious::Plugin::ResourcefulRoutes> makes use of nested routes, while the
+following code defines seperate routes for demonstration purposes):
 
 
         # GET /cities/new - form to create a user
@@ -344,8 +422,6 @@ or written as code:
           ->to(controller => 'cities', action => 'delete')
           ->name('cities_delete');
 
-Actually, L<Mojolicious::Plugin::ResourcefulRoutes> makes use of nested routes
-(the code above defines seperate routes for demonstration purposes).
 
 Sometimes, you don't want to give users access to all, but only selected
 controller methods.
