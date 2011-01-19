@@ -364,8 +364,8 @@ routes on each start of your app.
     GET      /cities/:id/delete      Cities      delete_form     cities_delete_form
     GET      /cities                 Cities      index           cities_index
     POST     /cities                 Cities      create          cities_create
-    PUT      /cities                 Cities      update          cities_update
-    DELETE   /cities                 Cities      delete          cities_delete
+    PUT      /cities/:id             Cities      update          cities_update
+    DELETE   /cities/:id             Cities      delete          cities_delete
 
 For example, if a user requests "/cities/paris/edit" via "GET", the "edit_form"
 method of the "Cities" controller is called. It's up to you what to put into
